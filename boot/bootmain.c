@@ -19,7 +19,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-#include "elf.h"
+#include <elf.h>
 #include <sys/types.h>
 #include <aim/boot.h>
 
@@ -36,31 +36,33 @@ typedef struct MBR_Partion_Entry{
 	uint32_t section_num;
 }PE;
 
-uint8_t *mbr; // Master Book Record
+uint8_t mbr[]; // Master Book Record
+PE *pe;
 __noreturn
 void bootmain(void)
 {
 	struct elfhdr *elf;
 	struct proghdr *ph, *eph;
 	void (*entry)(void);
-	uchar* pa;
+	uint8_t* pa;
 
-	mbr = (PE *)(0x7c00 + 0x1be);
+	mbr = (uint8_t *)(0x7c00);
+	pe = (PE *)((uint32_t)mbr + 0x1be);
 	elf = (struct elfhdr*)0x10000;  // scratch space
 	
-	uint32_t kOffset = (mbr.LBA_of_first_absolute_sector) * 512;
+	uint32_t kOffset = (mbr->LBA_of_first_absolute_sector) * 512;
 	// Read 1st page off disk
-	readseg((uchar*)elf, 10240, 0); //copy the kernel to the memory
+	readseg((uint8_t*)elf, 10240, 0); //copy the kernel to the memory
 
 	// Is this an ELF executable?
 	if(elf->magic != ELF_MAGIC)
 		return;  // let bootasm.S handle error
 
 	// Load each program segment (ignores ph flags).
-	ph = (struct proghdr*)((uchar*)elf + elf->phoff);
+	ph = (struct proghdr*)((uint8_t*)elf + elf->phoff);
 	eph = ph + elf->phnum;
 	for(; ph < eph; ph++){
-		pa = (uchar*)ph->paddr;
+		pa = (uint8_t*)ph->paddr;
 		readseg(pa, ph->filesz, ph->off);
 	if(ph->memsz > ph->filesz)
 		stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);

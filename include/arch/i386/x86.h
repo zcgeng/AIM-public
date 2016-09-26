@@ -1,5 +1,5 @@
 // Routines to let C code use special x86 instructions.
-
+#include <sys/types.h>
 static inline uchar
 inb(ushort port)
 {
