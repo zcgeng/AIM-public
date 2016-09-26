@@ -1,9 +1,9 @@
 // Routines to let C code use special x86 instructions.
 #include <sys/types.h>
-static inline uchar
-inb(ushort port)
+static inline uint8_t
+inb(uint16_t port)
 {
-  uchar data;
+  uint8_t data;
 
   asm volatile("in %1,%0" : "=a" (data) : "d" (port));
   return data;
@@ -19,13 +19,13 @@ insl(int port, void *addr, int cnt)
 }
 
 static inline void
-outb(ushort port, uchar data)
+outb(uint16_t port, uint8_t data)
 {
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
 static inline void
-outw(ushort port, ushort data)
+outw(uint16_t port, uint16_t data)
 {
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
@@ -62,11 +62,11 @@ struct segdesc;
 static inline void
 lgdt(struct segdesc *p, int size)
 {
-  volatile ushort pd[3];
+  volatile uint16_t pd[3];
 
   pd[0] = size-1;
-  pd[1] = (uint)p;
-  pd[2] = (uint)p >> 16;
+  pd[1] = (uint32_t)p;
+  pd[2] = (uint32_t)p >> 16;
 
   asm volatile("lgdt (%0)" : : "r" (pd));
 }
@@ -76,31 +76,31 @@ struct gatedesc;
 static inline void
 lidt(struct gatedesc *p, int size)
 {
-  volatile ushort pd[3];
+  volatile uint16_t pd[3];
 
   pd[0] = size-1;
-  pd[1] = (uint)p;
-  pd[2] = (uint)p >> 16;
+  pd[1] = (uint32_t)p;
+  pd[2] = (uint32_t)p >> 16;
 
   asm volatile("lidt (%0)" : : "r" (pd));
 }
 
 static inline void
-ltr(ushort sel)
+ltr(uint16_t sel)
 {
   asm volatile("ltr %0" : : "r" (sel));
 }
 
-static inline uint
+static inline uint32_t
 readeflags(void)
 {
-  uint eflags;
+  uint32_t eflags;
   asm volatile("pushfl; popl %0" : "=r" (eflags));
   return eflags;
 }
 
 static inline void
-loadgs(ushort v)
+loadgs(uint16_t v)
 {
   asm volatile("movw %0, %%gs" : : "r" (v));
 }
@@ -117,10 +117,10 @@ sti(void)
   asm volatile("sti");
 }
 
-static inline uint
-xchg(volatile uint *addr, uint newval)
+static inline uint32_t
+xchg(volatile uint32_t *addr, uint32_t newval)
 {
-  uint result;
+  uint32_t result;
 
   // The + in "+m" denotes a read-modify-write operand.
   asm volatile("lock; xchgl %0, %1" :
@@ -130,16 +130,16 @@ xchg(volatile uint *addr, uint newval)
   return result;
 }
 
-static inline uint
+static inline uint32_t
 rcr2(void)
 {
-  uint val;
+  uint32_t val;
   asm volatile("movl %%cr2,%0" : "=r" (val));
   return val;
 }
 
 static inline void
-lcr3(uint val)
+lcr3(uint32_t val)
 {
   asm volatile("movl %0,%%cr3" : : "r" (val));
 }
@@ -149,35 +149,35 @@ lcr3(uint val)
 // hardware and by trapasm.S, and passed to trap().
 struct trapframe {
   // registers as pushed by pusha
-  uint edi;
-  uint esi;
-  uint ebp;
-  uint oesp;      // useless & ignored
-  uint ebx;
-  uint edx;
-  uint ecx;
-  uint eax;
+  uint32_t edi;
+  uint32_t esi;
+  uint32_t ebp;
+  uint32_t oesp;      // useless & ignored
+  uint32_t ebx;
+  uint32_t edx;
+  uint32_t ecx;
+  uint32_t eax;
 
   // rest of trap frame
-  ushort gs;
-  ushort padding1;
-  ushort fs;
-  ushort padding2;
-  ushort es;
-  ushort padding3;
-  ushort ds;
-  ushort padding4;
-  uint trapno;
+  uint16_t gs;
+  uint16_t padding1;
+  uint16_t fs;
+  uint16_t padding2;
+  uint16_t es;
+  uint16_t padding3;
+  uint16_t ds;
+  uint16_t padding4;
+  uint32_t trapno;
 
   // below here defined by x86 hardware
-  uint err;
-  uint eip;
-  ushort cs;
-  ushort padding5;
-  uint eflags;
+  uint32_t err;
+  uint32_t eip;
+  uint16_t cs;
+  uint16_t padding5;
+  uint32_t eflags;
 
   // below here only when crossing rings, such as from user to kernel
-  uint esp;
-  ushort ss;
-  ushort padding6;
+  uint32_t esp;
+  uint16_t ss;
+  uint16_t padding6;
 };
