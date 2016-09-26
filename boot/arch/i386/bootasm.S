@@ -16,9 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
+#ifndef HAVE_CONFIG_H
+#define HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
+
+#include "mmu.h"
+#include "asm.h"
 
 .globl _start
 _start:
@@ -79,7 +83,7 @@ start32:
   movl    $start, %esp
   call    bootmain
 
-  # If bootmain returns (it shouldn't), trigger a Bochs
+/*  # If bootmain returns (it shouldn't), trigger a Bochs
   # breakpoint if running under Bochs, then loop.
   movw    $0x8a00, %ax            # 0x8a00 -> port 0x8a00
   movw    %ax, %dx
@@ -88,6 +92,8 @@ start32:
   outw    %ax, %dx
 spin:
   jmp     spin
+
+*/
 
 # Bootstrap GDT
 .p2align 2                                # force 4 byte alignment
