@@ -65,8 +65,8 @@ void bootmain(void)
 	readseg((uint8_t*)elf, 10240, 0); //copy the kernel to the memory
 
 	// Is this an ELF executable?
-	if(elf->e_ident != ELF_MAGIC)
-		return;  // let bootasm.S handle error
+	if(*((uint32_t *)elf->e_ident) != ELF_MAGIC)
+		while(1);  // let bootasm.S handle error // no return
 
 	// Load each program segment (ignores ph flags).
 	ph = (struct elf32_phdr*)((uint8_t*)elf + elf->e_phoff);
