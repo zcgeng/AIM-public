@@ -58,6 +58,7 @@ void bootmain(void)
 
 	mbr = (uint8_t *)(0x7c00);
 	pe = (PE *)((uint32_t)mbr + 0x1be);
+	pe++; // next partion
 	elf = (struct elf32hdr*)0x10000;  // scratch space
 	
 	uint32_t kOffset = (pe->LBA_of_first_absolute_sector) * SECTSIZE;

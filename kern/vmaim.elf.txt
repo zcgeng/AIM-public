@@ -36,16 +36,13 @@ void master_early_init(void)
 	arch_early_init();
    2001b:	e8 08 00 00 00       	call   20028 <arch_early_init>
 
-00020020 <ZCG>:
+00020020 <MY_DEAD_LOOP>:
 	goto panic;
 
 panic:
 	//while (1);
-	asm(
-   20020:	eb fe                	jmp    20020 <ZCG>
-		"ZCG:"
-		"jmp ZCG"	
-	);
+	asm("MY_DEAD_LOOP: jmp MY_DEAD_LOOP");
+   20020:	eb fe                	jmp    20020 <MY_DEAD_LOOP>
 }
    20022:	83 c4 08             	add    $0x8,%esp
    20025:	5b                   	pop    %ebx
