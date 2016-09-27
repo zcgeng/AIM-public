@@ -61,9 +61,9 @@ void bootmain(void)
 	pe++; // next partion
 	elf = (struct elf32hdr*)0x10000;  // scratch space
 	
-	uint32_t kOffset = (pe->LBA_of_first_absolute_sector) * SECTSIZE;
+	uint32_t disk_offset = (pe->LBA_of_first_absolute_sector) * SECTSIZE;
 	// Read 1st page off disk
-	readseg((uint8_t*)elf, 10240, 0); //copy the kernel to the memory
+	readseg((uint8_t*)elf, 10240, disk_offset); //copy the kernel to the memory
 
 	// Is this an ELF executable?
 	if(*((uint32_t *)(elf->e_ident)) != ELF_MAGIC)
@@ -74,7 +74,7 @@ void bootmain(void)
 	eph = ph + elf->e_phnum;
 	for(; ph < eph; ph++){
 		pa = (uint8_t*)ph->p_paddr;
-		readseg(pa, ph->p_filesz, ph->p_offset + kOffset);
+		readseg(pa, ph->p_filesz, ph->p_offset + disk_offset);
 	if(ph->p_memsz > ph->p_filesz)
 		stosb(pa + ph->p_filesz, 0, ph->p_memsz - ph->p_filesz);
 	}

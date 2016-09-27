@@ -30,7 +30,9 @@ void master_early_init(void)
 	goto panic;
 
 panic:
-	//while (1);
-	asm("MY_DEAD_LOOP: jmp MY_DEAD_LOOP");
+	asm(
+		"LOOP: hlt;"
+		"jmp LOOP;"
+	);
 }
 
