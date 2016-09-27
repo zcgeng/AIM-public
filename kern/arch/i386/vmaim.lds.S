@@ -40,8 +40,9 @@ SECTIONS
 	}                                    
         .bss :
         {
-		
-		*(.bss)
+		_bss_start = .;
+		*(.bss);
+		_bss_end = .;
 	}                      
         _end = .;
 }

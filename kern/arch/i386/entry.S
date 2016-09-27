@@ -23,7 +23,19 @@
 .text
 
 .globl master_early_entry
+
 master_early_entry:
+	cli
+	lea _bss_start, %eax
+	lea _bss_end, %ebx
+Loop:
+	cmp %eax, %ebx
+	je Loop_end
+	movb $0, (%eax)
+	add $1, %eax
+	jmp Loop
+Loop_end:
+
 	push %ebp
 	mov %esp, %ebp
 	call master_early_init
