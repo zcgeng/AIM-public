@@ -19,11 +19,17 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
+#include <aim/memlayout.h>
 
 .text
 
-.globl master_early_entry
+# By convention, the _start symbol specifies the ELF entry point.
+# Since we haven't set up virtual memory yet, our entry point is
+# the physical address of 'entry'.
+.globl _start
+_start = V2P_WO(master_early_entry)
 
+.globl master_early_entry
 master_early_entry:
 	cli
 	lea _bss_start, %eax

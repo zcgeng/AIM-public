@@ -23,6 +23,7 @@
 #include <elf.h>
 #include <sys/types.h>
 #include <aim/boot.h>
+#include <aim/memlayout.h>
 
 #define SECTSIZE 512
 #define ELF_MAGIC 0x464C457FU

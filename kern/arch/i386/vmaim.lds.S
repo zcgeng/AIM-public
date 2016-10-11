@@ -27,11 +27,11 @@
  * linker script.
  */
 
-ENTRY(master_early_entry)
+ENTRY(_start)
 SECTIONS
 {
-	. = KERNBASE;
-        .text : AT(0x100000) 
+	. = KERNBASE + 0x100000; /* high address as 运行地址 */
+        .text : AT(0x100000) /* physical address as 存储地址 */
         {
           	*(.text);
         }
