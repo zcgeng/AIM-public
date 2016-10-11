@@ -21,7 +21,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #define __LDSCRIPT__
-
+#include <aim/memlayout.h>
 /*
  * Using the C preprocessor, we allow includes and macro expansion in this
  * linker script.
@@ -30,8 +30,8 @@
 ENTRY(master_early_entry)
 SECTIONS
 {
-	. = 0x20000;
-        .text :
+	. = KERNBASE;
+        .text : AT(0x100000) 
         {
           	*(.text);
         }
@@ -42,9 +42,9 @@ SECTIONS
 	}                                    
         .bss :
         {
-		_bss_start = .;
+		PROVIDE(_bss_start = .);
 		*(.bss);
-		_bss_end = .;
+		PROVIDE(_bss_end = .);
 	}                      
         _end = .;
 }

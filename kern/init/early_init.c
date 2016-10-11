@@ -22,6 +22,7 @@
 
 #include <sys/types.h>
 #include <aim/init.h>
+#include <arch/i386/x86.h>
 
 __noreturn
 void master_early_init(void)
@@ -30,9 +31,6 @@ void master_early_init(void)
 	goto panic;
 
 panic:
-	asm(
-		"LOOP: hlt;"
-		"jmp LOOP;"
-	);
+	my_panic();
 }
 
