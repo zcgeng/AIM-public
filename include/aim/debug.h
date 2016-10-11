@@ -16,15 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+#ifndef _AIM_DEBUG_H
+#define _AIM_DEBUG_H
 
-#include <sys/types.h>
-#include <aim/init.h>
+#ifndef __ASSEMBLER__
 
-void arch_early_init(void)
-{
+/* 
+ * We just want several function here, avoid include hell please.
+ */
+__noreturn
+void panic(const char *fmt, ...);
 
-}
+#define assert(condition) \
+	do { \
+		if (!(condition)) \
+			panic("Assertion failed in %s (%s:%d): %s\n", \
+			    __func__, __FILE__, __LINE__, #condition); \
+	} while (0)
+
+#ifdef DEBUG
+#define kpdebug(...) //kprintf("DEBUG: " __VA_ARGS__)
+#else
+#define kpdebug(...)
+#endif
+
+#endif /* !__ASSEMBLER__ */
+
+#endif /* !_AIM_DEBUG_H */
 

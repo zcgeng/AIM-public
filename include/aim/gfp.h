@@ -16,15 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+#ifndef _AIM_GFP_H
+#define _AIM_GFP_H
 
-#include <sys/types.h>
-#include <aim/init.h>
+/*
+ * gfp.h provides various flags controlling behaviors or providing constraints
+ * for allocating/freeing.
+ */
+#ifndef __ASSEMBLER__
+typedef uint32_t gfp_t;
+#endif /* !__ASSEMBLER__ */
 
-void arch_early_init(void)
-{
+#define GFP_UNSAFE	0x1	/* Do not fill in junk before freeing */
+#define GFP_ZERO	0x2	/* Zero out the buffer after allocation */
 
-}
+#endif /* !_AIM_GFP_H */
 

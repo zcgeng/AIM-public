@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
+/* Copyright (C) 2016 Gan Quan <coin2028@hotmail.com>
  *
  * This file is part of AIM.
  *
@@ -16,15 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+#ifndef _PANIC_H
+#define _PANIC_H
 
-#include <sys/types.h>
-#include <aim/init.h>
+#ifndef __ASSEMBLER__
 
-void arch_early_init(void)
-{
+/*
+ * Internal arch-independent code for panicking current processor.
+ * May be called from arch code.
+ */
+__noreturn
+void __local_panic(void);
 
-}
+__noreturn
+void panic(const char *fmt, ...);
+
+/* Arch/mach-dependent code */
+void panic_other_cpus(void);
+
+#endif /* !__ASSEMBLER__ */
+
+#endif
 

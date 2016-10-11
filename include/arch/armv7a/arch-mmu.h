@@ -16,15 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+#ifndef _ARCH_MMU_H
+#define _ARCH_MMU_H
 
-#include <sys/types.h>
-#include <aim/init.h>
+#ifndef __ASSEMBLER__
 
-void arch_early_init(void)
-{
+#endif /* !__ASSEMBLER__ */
 
-}
+#endif /* !_ARCH_MMU_H */
 

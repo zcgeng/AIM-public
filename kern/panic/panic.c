@@ -21,10 +21,40 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <sys/types.h>
-#include <aim/init.h>
+#include <aim/panic.h>
 
-void arch_early_init(void)
+#include <libc/stdarg.h>
+#include <libc/stddef.h>
+#include <libc/stdio.h>
+
+/*
+ * The rest place for every processor during a panic.
+ *
+ * __local_panic() is executed once per processor.
+ */
+__noreturn
+void __local_panic(void)
 {
+	/*
+	 * We cannot simply do tight loops at panic. Modern kernels turn down
+	 * processors and other devices to keep energy consumption and heat
+	 * generation low.
+	 * Later on there will be interfaces for the targets and drivers.
+	 * We currently do a tight loop.
+	 */
 
+	for (;;)
+		/* nothing */;
+}
+
+/*
+ * The place where a panic starts.
+ *
+ * panic() is executed only on the processor throwing the panic.
+ */
+__noreturn
+void panic(const char *fmt, ...)
+{
+	__local_panic();
 }
 

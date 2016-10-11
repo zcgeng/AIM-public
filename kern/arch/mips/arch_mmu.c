@@ -21,10 +21,9 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <sys/types.h>
-#include <aim/init.h>
+#include <aim/mmu.h>
 
-void arch_early_init(void)
+void mmu_init(pgindex_t *boot_page_index)
 {
-
 }
 

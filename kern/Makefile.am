@@ -19,23 +19,27 @@ include $(top_srcdir)/env.am
 
 SUBDIRS = \
 	arch \
-	init
+	init \
+	mm \
+	panic
+
+BUILT_SOURCES = vmaim.lds
 
 noinst_PROGRAMS = vmaim.elf
-nodist_noinst_DATA = vmaim.lds vmaim.s
-CLEANFILES = vmaim.lds vmaim.s
+nodist_noinst_DATA = vmaim.s
+CLEANFILES = boot.lds vmaim.s
 
 # This list should always be ordered carefully
 KERN_LIBS = \
 	arch/$(ARCH)/libentry.la \
 	init/libearlyinit.la \
+	mm/libmm.la \
+	panic/libpanic.la \
 	arch/$(ARCH)/libarch.la
 
 vmaim_elf_SOURCES =
 vmaim_elf_LDADD = $(KERN_LIBS)
-vmaim_elf_DEPENDENCIES = \
-	vmaim.lds \
-	$(KERN_LIBS)
+EXTRA_vmaim_elf_DEPENDENCIES = vmaim.lds
 vmaim_elf_LDFLAGS = $(AM_LDFLAGS) -T vmaim.lds
 
 # This file has double suffix, makefile rule cannot wildcard him

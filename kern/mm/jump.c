@@ -21,10 +21,36 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <sys/types.h>
-#include <aim/init.h>
+#include <aim/panic.h>
 
-void arch_early_init(void)
+#define JUMP_HANDLER_QUEUE_LENGTH	10
+static int __jump_handler_queue_size;
+static generic_fp __jump_handler_queue[JUMP_HANDLER_QUEUE_LENGTH];
+
+void jump_handlers_clear(void)
 {
+	__jump_handler_queue_size = 0;
+}
 
+int jump_handlers_add(generic_fp entry)
+{
+	if (__jump_handler_queue_size > JUMP_HANDLER_QUEUE_LENGTH) {
+		/* Bad data structure. Panic immediately to prevent damage. */
+		panic("JUMP handler data structure invalid.\n");
+	}
+	if (__jump_handler_queue_size == JUMP_HANDLER_QUEUE_LENGTH) {
+		/* Queue full */
+		return EOF;
+	}
+	__jump_handler_queue[__jump_handler_queue_size] = entry;
+	__jump_handler_queue_size += 1;
+	return 0;
+}
+
+void jump_handlers_apply(void)
+{
+	for (int i = 0; i < __jump_handler_queue_size; ++i) {
+		__jump_handler_queue[i]();
+	}
 }
 
