@@ -22,9 +22,21 @@
 
 #include <sys/types.h>
 #include <aim/init.h>
+#include <arch/i386/mmu.h>
+#include <arch/i386/x86.h>
+
+// kernel gdt
+struct segdesc gdt[] = {
+	SEG(0x0, 0x0, 0x0, 0x0),			// null seg
+	SEG(STA_X|STA_R, 0, 0xffffffff, 0),		// kernel code
+	SEG(STA_W, 0, 0xffffffff, 0),			// kernel data
+	SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER),	// user code
+	SEG(STA_W, 0, 0xffffffff, DPL_USER)		// user data
+};
 
 void arch_early_init(void)
 {
-
+	// setup kernel segment descriptors.
+	lgdt(gdt, sizeof(gdt));
 }
 

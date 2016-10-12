@@ -1,6 +1,10 @@
 // This file contains definitions for the
 // x86 memory management unit (MMU).
 
+// compromizes made by zhaochanggeng
+#define uint unsigned int
+#define ushort unsigned short 
+
 // Eflags register
 #define FL_CF           0x00000001      // Carry Flag
 #define FL_PF           0x00000004      // Parity Flag
