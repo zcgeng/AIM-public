@@ -44,7 +44,11 @@ SECTIONS
         {
 		PROVIDE(_bss_start = .);
 		*(.bss);
+		. = ALIGN(4096);
+		PROVIDE(kstack = .);
+		. += KSTACKSIZE;
+		PROVIDE(kstack_top = .);
 		PROVIDE(_bss_end = .);
-	}                      
+	}           
         _end = .;
 }

@@ -42,9 +42,11 @@ Loop:
 	jmp Loop
 Loop_end:
 
-	push %ebp
-	mov %esp, %ebp
+	# Set up the stack pointer.
+	mov	$(V2P_WO(kstack_top)), %esp
+	xor	%eax, %eax
+	push	%eax		// eip=0
+	push	%eax		// ebp=0
+	mov	%esp, %ebp
+
 	call master_early_init
-	pop %ebp
-	ret
-	
