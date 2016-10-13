@@ -20,7 +20,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 #include <aim/memlayout.h>
-#include <arch/i386/mmu.h>
+#include <arch-mmu.h>
 
 .text
 

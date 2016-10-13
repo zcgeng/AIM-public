@@ -22,7 +22,7 @@
 
 #include <sys/types.h>
 #include <aim/init.h>
-#include <arch/i386/mmu.h>
+#include <arch-mmu.h>
 #include <arch/i386/x86.h>
 
 // kernel gdt

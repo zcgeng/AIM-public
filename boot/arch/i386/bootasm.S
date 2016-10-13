@@ -20,7 +20,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#include "mmu.h"
+#include "arch-mmu.h"
 #include "asm.h"
 
 .globl _start
