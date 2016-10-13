@@ -64,4 +64,10 @@ turn_on_mmu:
 	orl     $(CR0_PG), %eax
 	orl	$(CR0_WP), %eax
 	movl    %eax, %cr0
+
+	# Set up the stack pointer.
+	mov	$(kstack_top), %esp
+	mov	%esp, %ebp
+	
+	# there we go
 	ljmp    $(SEG_KCODE<<3), $panic
