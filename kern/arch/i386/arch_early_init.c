@@ -42,7 +42,8 @@ pde_t entrypgdir[NPDENTRIES] = {
   [KERN_BASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
 };
 
-void turn_on_mmu();
+__noreturn void turn_on_mmu();
+__noreturn
 void arch_early_init(void)
 {
 	lgdt(gdt, sizeof(gdt)); // setup kernel segment descriptors.

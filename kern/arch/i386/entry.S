@@ -64,4 +64,4 @@ turn_on_mmu:
 	orl     $(CR0_PG), %eax
 	orl	$(CR0_WP), %eax
 	movl    %eax, %cr0
-	ret
+	ljmp    $(SEG_KCODE<<3), $panic
