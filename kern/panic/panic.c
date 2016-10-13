@@ -43,8 +43,11 @@ void __local_panic(void)
 	 * We currently do a tight loop.
 	 */
 
-	for (;;)
-		/* nothing */;
+	asm(
+		"LOOP: hlt;"
+		"jmp LOOP;"
+	);
+	for(;;);
 }
 
 /*

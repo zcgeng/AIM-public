@@ -20,6 +20,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 #include <aim/memlayout.h>
+#include <arch/i386/mmu.h>
 
 .text
 
@@ -32,21 +33,35 @@ _start = V2P_WO(master_early_entry)
 .globl master_early_entry
 master_early_entry:
 	cli
-	lea _bss_start, %eax
-	lea _bss_end, %ebx
-Loop:
-	cmp %eax, %ebx
-	je Loop_end
-	movb $0, (%eax)
-	add $1, %eax
-	jmp Loop
-Loop_end:
 
+	# clean .bss
+	cld
+	mov $_bss_start, %eax
+	mov $_bss_end, %ecx
+	sub $_bss_start, %ecx
+	rep stosb
+	
 	# Set up the stack pointer.
 	mov	$(V2P_WO(kstack_top)), %esp
 	xor	%eax, %eax
-	push	%eax		// eip=0
-	push	%eax		// ebp=0
+	push	%eax		# eip=0
+	push	%eax		# ebp=0
 	mov	%esp, %ebp
-
+	
 	call master_early_init
+
+.globl turn_on_mmu
+turn_on_mmu:
+	# Turn on page size extension for 4Mbyte pages
+	movl    %cr4, %eax
+	orl     $(CR4_PSE), %eax
+	movl    %eax, %cr4
+	# Set page directory 
+	movl    $(V2P_WO(entrypgdir)), %eax;  # defined in arch_early_init.c
+	movl    %eax, %cr3
+	# Turn on paging
+	movl    %cr0, %eax
+	orl     $(CR0_PG), %eax
+	orl	$(CR0_WP), %eax
+	movl    %eax, %cr0
+	ret

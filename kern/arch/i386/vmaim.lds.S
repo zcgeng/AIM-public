@@ -30,8 +30,8 @@
 ENTRY(_start)
 SECTIONS
 {
-	. = KERNBASE + 0x100000; /* high address as 运行地址 */
-        .text : AT(0x100000) /* physical address as 存储地址 */
+	. = KERN_LINK; /* high address as 运行地址 */
+        .text : AT(EXTMEM) /* physical address as 存储地址 */
         {
           	*(.text);
         }

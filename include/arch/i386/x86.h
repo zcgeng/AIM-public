@@ -1,15 +1,6 @@
 // Routines to let C code use special x86 instructions.
 #include <sys/types.h>
 
-static inline void
-my_panic()
-{
-	asm(
-		"LOOP: hlt;"
-		"jmp LOOP;"
-	);
-}
-
 static inline uint8_t
 inb(uint16_t port)
 {

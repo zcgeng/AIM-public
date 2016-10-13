@@ -52,6 +52,9 @@ typedef signed int		int32_t;
 typedef unsigned long long	uint64_t;
 typedef signed long long	int64_t;
 
+typedef unsigned int   uint;
+typedef unsigned short ushort;
+typedef unsigned char  uchar;
 typedef unsigned long ulong;
 
 typedef unsigned int bool;
@@ -59,6 +62,8 @@ typedef unsigned int bool;
 #define true	1
 
 typedef void *uintptr_t;
+
+typedef uint pde_t;
 
 typedef uint32_t atomic_t;
 typedef int32_t satomic_t;
