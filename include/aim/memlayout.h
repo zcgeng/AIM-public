@@ -17,12 +17,10 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#define EXTMEM  0x100000            // Start of extended memory
-#define PHYSTOP 0xE000000           // Top physical memory
 #define DEVSPACE 0xFE000000         // Other devices are at high addresses
 
 // Key addresses for address space layout
-#define KERN_LINK (KERN_BASE+EXTMEM)  // Address where kernel is linked
+#define KERN_LINK (KERN_BASE+KERN_START)  // Address where kernel is linked
 
 #define V2P(a) (((uint) (a)) - KERN_BASE)
 #define P2V(a) (((void *) (a)) + KERN_BASE)

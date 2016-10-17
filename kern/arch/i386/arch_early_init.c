@@ -36,10 +36,10 @@ struct segdesc gdt[] = {
 
 __attribute__((__aligned__(PGSIZE)))
 pde_t entrypgdir[NPDENTRIES] = {
-  // Map VA's [0, 4MB) to PA's [0, 4MB)
-  [0] = (0) | PTE_P | PTE_W | PTE_PS,
-  // Map VA's [KERNBASE, KERNBASE+4MB) to PA's [0, 4MB)
-  [KERN_BASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
+  // Map VA's [KERN_START, KERN_START + 4MB) to PA's [KERN_START, KERN_START + 4MB)
+  [KERN_START>>PDXSHIFT] = (KERN_START) | PTE_P | PTE_W | PTE_PS,
+  // Map VA's [KERN_BASE+KERN_START, KERN_BASE+KERN_START+4MB) to PA's [KERN_START, KERN_START + 4MB)
+  [(KERN_BASE + KERN_START)>>PDXSHIFT] = (KERN_START) | PTE_P | PTE_W | PTE_PS,
 };
 
 __noreturn void turn_on_mmu();

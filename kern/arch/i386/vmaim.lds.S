@@ -31,7 +31,7 @@ ENTRY(_start)
 SECTIONS
 {
 	. = KERN_LINK; /* high address as 运行地址 */
-        .text : AT(EXTMEM) /* physical address as 存储地址 */
+        .text : AT(KERN_START) /* physical address as 存储地址 */
         {
           	*(.text);
         }
