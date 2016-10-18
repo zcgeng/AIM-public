@@ -27,10 +27,6 @@
 #include <arch-mmu.h>
 #include <aim/memlayout.h>
 
-void mmu_init(pgindex_t *boot_page_index)
-{
-}
-
 __attribute__((__aligned__(PGSIZE)))
 pgindex_t entrypgdir[NPDENTRIES];
 
