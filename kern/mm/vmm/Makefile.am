@@ -17,9 +17,10 @@
 
 include $(top_srcdir)/env.am
 
-noinst_HEADERS = \
-	arch-boot.h \
-	arch-io.h \
-	arch-mmu.h \
-	asm.h
+noinst_LTLIBRARIES = libvmm.la
+noinst_DATA =
+
+SRCS = vmm.c
+
+libvmm_la_SOURCES = $(SRCS)
 
