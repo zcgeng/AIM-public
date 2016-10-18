@@ -34,19 +34,13 @@ struct segdesc gdt[] = {
 	SEG(STA_W, 0, 0xffffffff, DPL_USER)		// user data
 };
 
-__attribute__((__aligned__(PGSIZE)))
-pde_t entrypgdir[NPDENTRIES] = {
-  // Map VA's [KERN_START, KERN_START + 4MB) to PA's [KERN_START, KERN_START + 4MB)
-  [KERN_START>>PDXSHIFT] = (KERN_START) | PTE_P | PTE_W | PTE_PS,
-  // Map VA's [KERN_BASE+KERN_START, KERN_BASE+KERN_START+4MB) to PA's [KERN_START, KERN_START + 4MB)
-  [(KERN_BASE + KERN_START)>>PDXSHIFT] = (KERN_START) | PTE_P | PTE_W | PTE_PS,
-};
-
 __noreturn void turn_on_mmu();
+void early_mm_init();
 __noreturn
 void arch_early_init(void)
 {
 	lgdt(gdt, sizeof(gdt)); // setup kernel segment descriptors.
+	early_mm_init();
 	turn_on_mmu(); // defined in entry.S
 }
 

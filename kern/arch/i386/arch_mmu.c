@@ -23,27 +23,33 @@
 #include <sys/types.h>
 #include <aim/mmu.h>
 #include <arch-mmu.h>
+#include <aim/memlayout.h>
 
 void mmu_init(pgindex_t *boot_page_index)
 {
 }
 
+__attribute__((__aligned__(PGSIZE)))
+pgindex_t entrypgdir[NPDENTRIES];
+
+extern uint32_t _end;
 /* Initialize a page index table and fill in the structure @pgindex */
-//pgindex_t *init_pgindex(void){
-	
-//}
+void early_mm_init(void){
+	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)0, (uint32_t)&_end - KERN_BASE);
+	page_index_early_map((pgindex_t*)V2P(entrypgdir), KERN_START, P2V(KERN_START), (uint32_t)&_end - KERN_BASE);
+}
 
 /* Map virtual address starting at @vaddr to physical pages at @paddr, with
- * VMA flags @flags (VMA_READ, etc.) Additional flags apply as in kmmap.h.
+ * VMA flags @flags (VMA_READ, etc.) Additional flags apply as in arch-mmu.h
  */
-int map_pages(pgindex_t *pgindex, void *vaddr, addr_t paddr, size_t size, uint32_t flags){
-	char *a, *last;
-	a = (char*)PGROUNDDOWN((uint)vaddr);
-	last = (char*)PGROUNDDOWN(((uint)vaddr) + size - 1);
+int page_index_early_map(pgindex_t *boot_page_index, addr_t paddr, void *vaddr, size_t size){
+	uint32_t a, last;
+	a = ((uint32_t)vaddr);
+	last = (((uint32_t)vaddr) + size - 1);
 	while(a < last){
-		*pgindex = paddr | flags | PTE_P;
-		a += PGSIZE;
-		paddr += PGSIZE;
+		boot_page_index[a >> PDXSHIFT] = paddr | PTE_P | PTE_W | PTE_PS;
+		a += (1 << 22);
+		paddr += (1 << 22);
 	}
 	return 0;
 }

@@ -57,7 +57,7 @@ turn_on_mmu:
 	orl     $(CR4_PSE), %eax
 	movl    %eax, %cr4
 	# Set page directory 
-	movl    $(V2P_WO(entrypgdir)), %eax;  # defined in arch_early_init.c
+	movl    $(V2P_WO(entrypgdir)), %eax;  # defined in arch_mmu.c
 	movl    %eax, %cr3
 	# Turn on paging
 	movl    %cr0, %eax
