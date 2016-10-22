@@ -47,7 +47,6 @@ int early_devices_init(void)
 }
 
 void arch_early_init();
-__noreturn void panic();
 __noreturn
 void master_early_init(void)
 {
@@ -70,6 +69,6 @@ void master_early_init(void)
 	goto panic;
 
 panic:
-	panic();
+	panic("panic in early_init.c !");
 }
 
