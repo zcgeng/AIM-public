@@ -48,3 +48,26 @@ static inline
 void outl(uint16_t port, uint8_t data)
 {
 }
+
+struct segdesc;
+static inline void
+lgdt(struct segdesc *p, int size)
+{
+  volatile uint16_t pd[3];
+
+  pd[0] = size-1;
+  pd[1] = (uint32_t)p;
+  pd[2] = (uint32_t)p >> 16;
+
+  asm volatile("lgdt (%0)" : : "r" (pd));
+}
+
+__noreturn static inline
+void jmp(void *addr){
+	asm(
+		"mov %0, %%eax;"
+		"jmp *%%eax;"
+		::"m"(addr)
+	);
+	for(;;);
+}

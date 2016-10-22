@@ -49,25 +49,4 @@ master_early_entry:
 	mov	%esp, %ebp
 	
 	call master_early_init
-
-.globl turn_on_mmu
-turn_on_mmu:
-	# Turn on page size extension for 4Mbyte pages
-	movl    %cr4, %eax
-	orl     $(CR4_PSE), %eax
-	movl    %eax, %cr4
-	# Set page directory 
-	movl    $(V2P_WO(entrypgdir)), %eax;  # defined in arch_mmu.c
-	movl    %eax, %cr3
-	# Turn on paging
-	movl    %cr0, %eax
-	orl     $(CR0_PG), %eax
-	orl	$(CR0_WP), %eax
-	movl    %eax, %cr0
-
-	# Set up the stack pointer.
-	mov	$(kstack_top), %esp
-	mov	%esp, %ebp
 	
-	# there we go
-	ljmp    $(SEG_KCODE<<3), $panic

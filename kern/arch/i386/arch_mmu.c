@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <aim/early_kmmap.h>
 #include <aim/mmu.h>
+#include <asm.h>
 #include <libc/string.h>
 #include <arch-mmu.h>
 #include <aim/memlayout.h>
@@ -65,4 +66,8 @@ void mmu_init(pgindex_t *boot_page_index)
 {
 }
 
+__noreturn
+void abs_jump(void *addr){
+	jmp(addr);
+}
 
