@@ -42,14 +42,14 @@ void early_mm_init(void){
  */
 int page_index_early_map(pgindex_t *boot_page_index, addr_t paddr, void *vaddr, size_t size){
 	uint32_t a, last;
-	a = ((uint32_t)vaddr);
-	last = (((uint32_t)vaddr) + size - 1);
+	a = PGROUNDDOWN((uint32_t)vaddr);
+	last = PGROUNDDOWN(((uint32_t)vaddr) + size - 1);
 	while(a < last){
 		boot_page_index[a >> PDXSHIFT] = paddr | PTE_P | PTE_W | PTE_PS;
 		a += (1 << 22);
 		paddr += (1 << 22);
 	}
-	return 0;
+	return (last - a) >> 22;
 }
 
 bool early_mapping_valid(struct early_mapping *entry)
