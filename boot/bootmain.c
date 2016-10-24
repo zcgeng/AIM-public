@@ -19,7 +19,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-#include <x86.h>
+#include <asm.h>
 #include <elf.h>
 #include <sys/types.h>
 #include <aim/boot.h>
