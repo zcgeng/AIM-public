@@ -71,7 +71,7 @@ void arch_early_init(void)
 		::"r"(V2P(&kstack_top))
 	);
 	
-	/* jump to the high address! */
+	/* jump to some high address! */
 	abs_jump(panic);
 }
 

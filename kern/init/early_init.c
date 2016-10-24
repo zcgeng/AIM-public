@@ -57,7 +57,7 @@ void master_early_init(void)
 	if (early_devices_init() < 0)
 		goto panic;
 	/* other preperations, including early secondary buses */
-	arch_early_init();
+	
 	if (early_console_init(
 		EARLY_CONSOLE_BUS,
 		EARLY_CONSOLE_BASE,
@@ -65,8 +65,7 @@ void master_early_init(void)
 	) < 0)
 		panic("Early console init failed.\n");
 	kputs("Hello, world!\n");
-
-	goto panic;
+	arch_early_init();
 
 panic:
 	panic("panic in early_init.c !");

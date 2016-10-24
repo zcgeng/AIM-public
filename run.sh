@@ -12,5 +12,5 @@ dd if=$HOME/OS2016/AIM/kern/vmaim.elf of=$HOME/OS2016/100m.img seek=20480 bs=512
 gnome-terminal -t "my_gdb" -x zsh -c "i386-unknown-elf-gdb $HOME/OS2016/AIM/kern/vmaim.elf -x gdb.cmd;"
 
 # now run it!
-qemu-system-i386 $HOME/OS2016/100m.img -gdb tcp::1234 -S
+qemu-system-i386 $HOME/OS2016/100m.img -serial stdio -gdb tcp::1234 -S
 
