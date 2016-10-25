@@ -26,7 +26,10 @@ typedef struct physical_memory_block{
     uint32_t Type; /* Address type of  this range */
 }PMB;
 
-#define PageBuddy(page) test_bit(PG_buddy, &(page)->flags)
+#define NODE_UNUSED 0
+#define NODE_USED 1	
+#define NODE_SPLIT 2
+#define NODE_FULL 3
 
 int area_n = 0;
 void test(){
@@ -49,20 +52,16 @@ void test(){
     }
 }
 
-static inline struct page* 
-__page_find_buddy(struct page* page, uint32_t page_idx, unsigned order){
-	uint32_t buddy_idx = page_idx ^ (1 << order);
-	return page + (buddy_idx - page_idx);
+struct buddy {
+	int level;
+	uint8_t tree[1000];
+};
+
+struct buddy my_buddy;
+
+void buddy_init(int level) {
+	int size = 1 << level;
+	my_buddy->level = level;
+	memset(my_buddy->tree , NODE_UNUSED , size*2-1);
+	return self;
 }
-
-static inline int
-page_is_buddy(struct page* page, struct page* buddy, int order){
-	if(page_zone_id(page) != page_zone_id(buddy))
-		return 0;
-	if(PageBuddy(buddy) && page_order(buddy) == order){
-		return 1;
-	}
-	return 0;
-}
-
-
