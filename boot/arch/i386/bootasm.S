@@ -57,6 +57,23 @@ _start:
   movw    %ax,%es             # -> Extra Segment
   movw    %ax,%ss             # -> Stack Segment
 
+getMem:
+	mov	$0x9000, %eax
+	xor	%ebx, %ebx
+	mov	$0x9004, %di
+loop:
+	mov	$0xe820, %eax
+	mov	$20, %ecx
+	mov	$0x534d4150, %edx
+	int	$0x15
+	cmp	$0, %ebx
+	je	endGetMem
+	add	$20, %di
+	incl	0x9000
+	jmp	loop
+endGetMem:
+
+
   # Physical address line A20 is tied to zero so that the first PCs 
   # with 2 MB would run software that assumed 1 MB.  Undo that.
 seta20.1:
@@ -96,9 +113,9 @@ start32:
   movw    %ax, %ds                # -> DS: Data Segment
   movw    %ax, %es                # -> ES: Extra Segment
   movw    %ax, %ss                # -> SS: Stack Segment
-  movw    $0, %ax                 # Zero segments not ready for use
-  movw    %ax, %fs                # -> FS
-  movw    %ax, %gs                # -> GS
+//  movw    $0, %ax                 # Zero segments not ready for use
+//  movw    %ax, %fs                # -> FS
+//  movw    %ax, %gs                # -> GS
 
   # Set up the stack pointer and call into C.
   movl    $_start, %esp

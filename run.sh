@@ -5,7 +5,7 @@ make clean
 make
 
 # load the files into the hardisk
-dd if=$HOME/OS2016/AIM/boot/boot.bin of=$HOME/OS2016/100m.img bs=446 count=1 conv=notrunc
+dd if=$HOME/OS2016/AIM/boot/boot.bin of=$HOME/OS2016/100m.img bs=452 count=1 conv=notrunc
 dd if=$HOME/OS2016/AIM/kern/vmaim.elf of=$HOME/OS2016/100m.img seek=20480 bs=512 count=100 conv=notrunc
 
 # open a new shell to use gdb

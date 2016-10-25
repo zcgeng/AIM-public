@@ -57,8 +57,8 @@ void bootmain(void)
 	void (*entry)(void);
 	uint8_t* pa;
 
-	mbr = (uint8_t *)(0x7c00);
-	pe = (PE *)((uint32_t)mbr + 0x1be) + 1;
+	//mbr = (uint8_t *)(0x7c00);
+	pe = (PE *)(0x7c00 + 0x1be) + 1;
 	elf = (struct elf32hdr*)0x10000;  // scratch space
 	
 	uint32_t disk_offset = (pe->LBA_of_first_absolute_sector) * SECTSIZE;
@@ -66,8 +66,8 @@ void bootmain(void)
 	readseg((uint8_t*)elf, 10240, disk_offset); //copy the kernel to the memory
 
 	// Is this an ELF executable?
-	if(*((uint32_t *)(elf->e_ident)) != ELF_MAGIC)
-		while(1);  // let bootasm.S handle error // no return
+	//if(*((uint32_t *)(elf->e_ident)) != ELF_MAGIC)
+		//while(1);  // let bootasm.S handle error // no return
 
 	// Load each program segment (ignores ph flags).
 	ph = (struct elf32_phdr*)((uint8_t*)elf + elf->e_phoff);
