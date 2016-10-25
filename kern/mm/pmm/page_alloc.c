@@ -14,6 +14,7 @@
 //#include <aim/sync.h>
 #include <aim/mmu.h>
 #include <aim/pmm.h>
+#include <arch-mmu.h>
 #include <aim/panic.h>
 #include <libc/string.h>
 #include <util.h>
@@ -27,45 +28,26 @@ typedef struct physical_memory_block{
     uint32_t Type; /* Address type of  this range */
 }PMB;
 
+struct buddy {
+	int level;
+	int baseAddr;
+	uint8_t tree[1 << 10]; // fixed buddy size: 4M
+};
+
+typedef struct area{
+	uint32_t base_addr;
+	uint32_t page_num;
+	struct buddy buddylist[10]; // TODO: change this into dynimic pointer
+};
+
+
+
+struct buddy my_buddy;
+
 #define NODE_UNUSED 0
 #define NODE_USED 1	
 #define NODE_SPLIT 2
 #define NODE_FULL 3
-
-int area_n = 0;
-void test(){
-    PMB* pmb = (PMB*)0x9004;
-    int num = *(int *)0x9000;
-    int i, largest = 0;
-    int tmp = 0;
-    kprintf("physical memory areas:\n");
-    kprintf("BaseAddr\tLength\t\tType(1-usable by OS, 2-reserved address)\n");
-    for(i = 0; i < num; ++i){
-        kprintf("0x%8x\t0x%8x\t0x%x\n", 
-                pmb->BaseAddrLow,
-                pmb->LengthLow,
-                pmb->Type);
-        if(pmb->Type == 1 && pmb->LengthLow > tmp){
-		tmp = pmb->LengthLow;
-		largest = i;
-        }
-        pmb++;
-    }
-}
-
-struct buddy {
-	int level;
-	uint8_t tree[40000];
-};
-
-struct buddy my_buddy;
-
-void buddy_init(int level) {
-	int size = 1 << level;
-	my_buddy.level = level;
-	memset(my_buddy.tree , NODE_UNUSED , size*2-1);
-	return;
-}
 
 static inline int
 is_pow_of_2(uint32_t x) {
@@ -83,6 +65,49 @@ next_pow_of_2(uint32_t x) {
 	x |= x>>16;
 	return x+1;
 }
+
+static inline int get_level(uint32_t page_num){
+	int i = 0;
+	for(i = 0; page_num >> i != 0; i++);
+	if(is_pow_of_2(page_num))
+		return i - 2;
+	else
+		return i;
+}
+
+void buddy_init(int level, uint32_t baseAddr);
+void test(){
+    PMB* pmb = (PMB*)0x9004;
+    int num = *(int *)0x9000;
+    int i, largest = 0;
+    int tmp = 0;
+    kprintf("physical memory areas:\n");
+    kprintf("BaseAddr\tLength\t\tType(1-usable by OS, 2-reserved address)\n");
+    for(i = 0; i < num; ++i){
+        kprintf("0x%8x\t0x%8x\t0x%x\n", 
+                pmb[i].BaseAddrLow,
+                pmb[i].LengthLow,
+                pmb[i].Type);
+        if(pmb[i].Type == 1 && pmb[i].LengthLow > tmp){
+		tmp = pmb[i].LengthLow;
+		largest = i;
+        }
+    }
+    buddy_init(10, PGROUNDUP(pmb[largest].BaseAddrLow));
+}
+
+
+
+void buddy_init(int level, uint32_t baseAddr) {
+	int size = 1 << level;
+	my_buddy.level = level;
+	my_buddy.baseAddr = baseAddr;
+	kprintf("level=%d, baseaddr=0x%x, size=0x%x\n", level, baseAddr, size);
+	memset(my_buddy.tree , NODE_UNUSED , size*2-1);
+	return;
+}
+
+
 
 /* get the page number of a tree node */
 static inline int
