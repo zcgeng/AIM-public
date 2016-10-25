@@ -72,3 +72,7 @@ panic:
 	panic("panic in early_init.c !");
 }
 
+void high_address_entry(){
+	test();
+	panic("succeed in high_address_entry!");
+}

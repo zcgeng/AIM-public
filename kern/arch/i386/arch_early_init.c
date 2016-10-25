@@ -38,7 +38,7 @@ struct segdesc gdt[] = {
 };
 
 void early_mm_init();
-void test();
+void high_address_entry();
 extern pgindex_t entrypgdir[];
 extern uint32_t kstack_top;
 __noreturn
@@ -73,6 +73,6 @@ void arch_early_init(void)
 	);
 	
 	/* jump to some high address! */
-	abs_jump(test);
+	abs_jump(high_address_entry);
 }
 

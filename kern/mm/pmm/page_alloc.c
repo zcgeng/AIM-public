@@ -74,10 +74,52 @@ static inline int get_level(uint32_t page_num){
 		return i;
 }
 
-void buddy_init(struct buddy* self, int level, uint32_t baseAddr);
+void buddy_init(struct buddy* self, int level);
 void buddy_free(struct buddy* self, int offset);
 int buddy_alloc(struct buddy* self, int s);
+static int page_alloc(struct pages *pages);
+
+
+
+
 void test(){
+	page_allocator_init();
+	struct pages a = {0, 4096*4096, 0};
+	page_alloc(&a);
+	kprintf("0x%x\n", a.paddr);
+	page_alloc(&a);
+	kprintf("0x%x\n", a.paddr);
+page_alloc(&a);
+	kprintf("0x%x\n", a.paddr);
+page_alloc(&a);
+	kprintf("0x%x\n", a.paddr);
+page_alloc(&a);
+	kprintf("0x%x\n", a.paddr);
+page_alloc(&a);
+	kprintf("0x%x\n", a.paddr);
+page_alloc(&a);
+	kprintf("0x%x\n", a.paddr);
+}
+
+
+static int page_alloc(struct pages *pages){
+	int i, offset = -2;
+	for(i = 0; i < area.buddy_num; ++i){
+		offset = buddy_alloc(&area.buddylist[i], (pages->size / PGSIZE) + 1);
+		if(offset >= 0) break;
+	}
+	if(offset == -1){
+		if(area.buddy_num == 10) return EOF;
+		buddy_init(&area.buddylist[area.buddy_num++], 10);
+		offset = buddy_alloc(&area.buddylist[i], (pages->size / PGSIZE) + 1); 
+	}
+	if(offset == -2 || offset == -1) return EOF;
+	pages->paddr = area.base_addr + (i << 22) + (offset << 12); // each buddy has 4MB size and each offset is 4KB
+	return 0;
+}
+
+int page_allocator_init(void){
+	// get memory infomation saved by boot loader
 	PMB* pmb = (PMB*)0x9004;
 	int num = *(int *)0x9000;
 	int i, largest = 0;
@@ -94,27 +136,12 @@ void test(){
 			largest = i;
 		}
 	}
-    
-	buddy_init(area.buddylist, 10, PGROUNDUP(pmb[largest].BaseAddrLow));
-int offset[10];
-	for(i = 0; i < 10; ++i){
-		offset[i] = buddy_alloc(&area.buddylist[0], 4 * i);
-		kprintf("alloc-%d:%d\n", i, offset[i]);
-	}
-	for(i = 0; i < 10; ++i){
-		buddy_free(&area.buddylist[0], offset[i]);
-	}
-	for(i = 0; i < 10; ++i){
-		offset[i] = buddy_alloc(&area.buddylist[0], 4 * i);
-		kprintf("alloc-%d:%d\n", i, offset[i]);
-	}
-	for(i = 0; i < 10; ++i){
-		buddy_free(&area.buddylist[0], offset[i]);
-	}
-	panic("success");
+	area.base_addr = PGROUNDUP(pmb[largest].BaseAddrLow);
+	area.page_num = pmb[i].LengthLow / 0x4096;
+	area.buddy_num = 1;
+	buddy_init(&area.buddylist[0], 10);
+	return 0;
 }
-
-
 
 void buddy_init(struct buddy* self, int level) {
 	int size = 1 << level;
@@ -160,8 +187,10 @@ int buddy_alloc(struct buddy* self, int s) {
 	}
 	int length = 1 << self->level;
 	//kprintf("length=%d\n", length);
-	if (size > length)
-		return -1;
+	if (size > length){
+		kprintf("too large");
+		return -2;
+	}
 
 	int index = 0;
 	int level = 0;
