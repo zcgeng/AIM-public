@@ -87,3 +87,27 @@ next_pow_of_2(uint32_t x) {
 	x |= x>>16;
 	return x+1;
 }
+
+static inline int
+_index_offset(int index, int level, int max_level) {
+	return ((index + 1) - (1 << level)) << (max_level - level);
+}
+
+static inline int
+get_buddy_index(int index){
+	return index - 1 + (index & 1) * 2;
+}
+
+static void 
+_mark_parent(struct buddy * self, int index) {
+	for (;;) {
+		int buddy = get_buddy_index(index);
+		if (buddy > 0 && (self->tree[buddy] == NODE_USED || self->tree[buddy] == NODE_FULL)) {
+			index = (index + 1) / 2 - 1;
+			self->tree[index] = NODE_FULL;
+		}
+		else {
+			return;
+		}
+	}
+}
