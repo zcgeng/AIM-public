@@ -77,46 +77,46 @@ static inline int get_level(uint32_t page_num){
 void buddy_init(struct buddy* self, int level);
 void buddy_free(struct buddy* self, int offset);
 int buddy_alloc(struct buddy* self, int s);
+int buddy_size(struct buddy * self, int offset);
 static int page_alloc(struct pages *pages);
-
+static void page_free(struct pages *pages);
 
 
 
 void test(){
 	page_allocator_init();
-	struct pages a = {0, 4096*4096, 0};
+	struct pages a = {0, 4097, 0};
 	page_alloc(&a);
 	kprintf("0x%x\n", a.paddr);
-	page_alloc(&a);
-	kprintf("0x%x\n", a.paddr);
-page_alloc(&a);
-	kprintf("0x%x\n", a.paddr);
-page_alloc(&a);
-	kprintf("0x%x\n", a.paddr);
-page_alloc(&a);
-	kprintf("0x%x\n", a.paddr);
-page_alloc(&a);
-	kprintf("0x%x\n", a.paddr);
-page_alloc(&a);
-	kprintf("0x%x\n", a.paddr);
+	page_free(&a);
+	kprintf("0x%x\n", a.size);
 }
 
 
 static int page_alloc(struct pages *pages){
 	int i, offset = -2;
+	int s = (pages->size + PGSIZE - 1) >> 12;
 	for(i = 0; i < area.buddy_num; ++i){
-		offset = buddy_alloc(&area.buddylist[i], (pages->size / PGSIZE) + 1);
+		offset = buddy_alloc(&area.buddylist[i], s);
 		if(offset >= 0) break;
 	}
 	if(offset == -1){
 		if(area.buddy_num == 10) return EOF;
 		buddy_init(&area.buddylist[area.buddy_num++], 10);
-		offset = buddy_alloc(&area.buddylist[i], (pages->size / PGSIZE) + 1); 
+		offset = buddy_alloc(&area.buddylist[i], s); 
 	}
 	if(offset == -2 || offset == -1) return EOF;
 	pages->paddr = area.base_addr + (i << 22) + (offset << 12); // each buddy has 4MB size and each offset is 4KB
 	return 0;
 }
+
+static void page_free(struct pages *pages) {
+	int buddyN = (pages->paddr - area.base_addr) >> 22;
+	int offset = ((pages->paddr + PGSIZE - 1) >> 12) % 1024;
+	kprintf("N=%d, offset=0x%x\n", buddyN, offset);
+	pages->size = buddy_size(&area.buddylist[buddyN], offset);
+}
+
 
 int page_allocator_init(void){
 	// get memory infomation saved by boot loader
@@ -188,7 +188,7 @@ int buddy_alloc(struct buddy* self, int s) {
 	int length = 1 << self->level;
 	//kprintf("length=%d\n", length);
 	if (size > length){
-		kprintf("too large");
+		kprintf("too large size:0x%x (length=0x%x)\n", size, length);
 		return -2;
 	}
 
@@ -276,6 +276,31 @@ void buddy_free(struct buddy* self, int offset) {
 		case NODE_UNUSED:
 			panic("Trying to free an unused block!\n");
 			return;
+		default:
+			length /= 2;
+			if (offset < left + length) {
+				index = index * 2 + 1;
+			} else {
+				left += length;
+				index = index * 2 + 2;
+			}
+			break;
+		}
+	}
+}
+
+int buddy_size(struct buddy * self, int offset) {
+	if( offset >= (1<< self->level)) return EOF;
+	int left = 0;
+	int length = 1 << self->level;
+	int index = 0;
+
+	for (;;) {
+		switch (self->tree[index]) {
+		case NODE_USED:
+			return EOF;
+		case NODE_UNUSED:
+			return EOF;
 		default:
 			length /= 2;
 			if (offset < left + length) {
