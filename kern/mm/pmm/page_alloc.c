@@ -14,6 +14,7 @@
 //#include <aim/sync.h>
 #include <aim/mmu.h>
 #include <aim/pmm.h>
+#include <aim/panic.h>
 #include <libc/string.h>
 #include <util.h>
 #include <aim/console.h>
@@ -66,11 +67,6 @@ void buddy_init(int level) {
 	return;
 }
 
-void
-buddy_delete(struct buddy * my_buddy) {
-	free(my_buddy);
-}
-
 static inline int
 is_pow_of_2(uint32_t x) {
 	return !(x & (x-1));
@@ -103,9 +99,9 @@ static void
 _mark_parent(int index) {
 	for (;;) {
 		int buddy = get_buddy_index(index);
-		if (buddy > 0 && (my_buddy->tree[buddy] == NODE_USED || my_buddy->tree[buddy] == NODE_FULL)) {
+		if (buddy > 0 && (my_buddy.tree[buddy] == NODE_USED || my_buddy.tree[buddy] == NODE_FULL)) {
 			index = (index + 1) / 2 - 1;
-			my_buddy->tree[index] = NODE_FULL;
+			my_buddy.tree[index] = NODE_FULL;
 		}
 		else {
 			return;
@@ -121,7 +117,7 @@ buddy_alloc(int s) {
 	} else {
 		size = (int)next_pow_of_2(s);
 	}
-	int length = 1 << my_buddy->level;
+	int length = 1 << my_buddy.level;
 
 	if (size > length)
 		return -1;
@@ -132,22 +128,22 @@ buddy_alloc(int s) {
 	// find size from the root
 	while (index >= 0) {
 		if (size == length) {
-			if (my_buddy->tree[index] == NODE_UNUSED) {
-				my_buddy->tree[index] = NODE_USED;
-				_mark_parent(my_buddy, index);
-				return _index_offset(index, level, my_buddy->level);
+			if (my_buddy.tree[index] == NODE_UNUSED) {
+				my_buddy.tree[index] = NODE_USED;
+				_mark_parent(index);
+				return _index_offset(index, level, my_buddy.level);
 			}
 		} else {
 			// size < length
-			switch (my_buddy->tree[index]) {
+			switch (my_buddy.tree[index]) {
 			case NODE_USED:
 			case NODE_FULL:
 				break;
 			case NODE_UNUSED:
 				// split first
-				my_buddy->tree[index] = NODE_SPLIT;
-				my_buddy->tree[index*2+1] = NODE_UNUSED;
-				my_buddy->tree[index*2+2] = NODE_UNUSED;
+				my_buddy.tree[index] = NODE_SPLIT;
+				my_buddy.tree[index*2+1] = NODE_UNUSED;
+				my_buddy.tree[index*2+2] = NODE_UNUSED;
 			default:
 				index = index * 2 + 1;
 				length /= 2;
@@ -182,10 +178,10 @@ static void
 _combine(int index) {
 	for (;;) {
 		int buddy = index - 1 + (index & 1) * 2;
-		if (buddy < 0 || my_buddy->tree[buddy] != NODE_UNUSED) {
-			my_buddy->tree[index] = NODE_UNUSED;
-			while (((index = (index + 1) / 2 - 1) >= 0) &&  my_buddy->tree[index] == NODE_FULL){
-				my_buddy->tree[index] = NODE_SPLIT;
+		if (buddy < 0 || my_buddy.tree[buddy] != NODE_UNUSED) {
+			my_buddy.tree[index] = NODE_UNUSED;
+			while (((index = (index + 1) / 2 - 1) >= 0) &&  my_buddy.tree[index] == NODE_FULL){
+				my_buddy.tree[index] = NODE_SPLIT;
 			}
 			return;
 		}
@@ -193,21 +189,22 @@ _combine(int index) {
 	}
 }
 
-void
-buddy_free(int offset) {
-	assert( offset < (1<< my_buddy->level));
+void buddy_free(int offset) {
+	if( offset < (1<< my_buddy.level))
+		panic("offset %d is too large!", offset);
 	int left = 0;
-	int length = 1 << my_buddy->level;
+	int length = 1 << my_buddy.level;
 	int index = 0;
 
 	for (;;) {
-		switch (my_buddy->tree[index]) {
+		switch (my_buddy.tree[index]) {
 		case NODE_USED:
-			assert(offset == left);
-			_combine(my_buddy, index);
+			if(offset == left)
+				panic("offset == left == 0x%x!\n", offset);
+			_combine(index);
 			return;
 		case NODE_UNUSED:
-			assert(0);
+			panic("Trying to free an unused page!\n");
 			return;
 		default:
 			length /= 2;
