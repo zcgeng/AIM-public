@@ -14,11 +14,13 @@
 //#include <aim/sync.h>
 #include <aim/mmu.h>
 #include <aim/pmm.h>
+#include <aim/vmm.h>
 #include <arch-mmu.h>
 #include <aim/panic.h>
 #include <libc/string.h>
 #include <util.h>
 #include <aim/console.h>
+void *kmalloc(size_t size, gfp_t flags);
 
 typedef struct physical_memory_block{
     uint32_t BaseAddrLow; /* Low 32 Bits of Base Address */
@@ -38,7 +40,7 @@ struct Area{
 	uint32_t base_addr;
 	uint32_t page_num;
 	uint32_t buddy_num;
-	struct buddy buddylist[10]; // TODO: change this into dynimic pointer
+	struct buddy* buddylist[100];
 };
 
 struct Area area;
@@ -83,13 +85,13 @@ int page_alloc(struct pages *pages){
 	int i, offset = -2;
 	int s = (pages->size + PGSIZE - 1) >> 12;
 	for(i = 0; i < area.buddy_num; ++i){
-		offset = buddy_alloc(&area.buddylist[i], s);
+		offset = buddy_alloc(area.buddylist[i], s);
 		if(offset >= 0) break;
 	}
 	if(offset == -1){
-		if(area.buddy_num == 10) return EOF;
-		buddy_init(&area.buddylist[area.buddy_num++], 10);
-		offset = buddy_alloc(&area.buddylist[i], s); 
+		if(area.buddy_num == 100) return EOF;
+		buddy_init(area.buddylist[area.buddy_num++], 10);
+		offset = buddy_alloc(area.buddylist[i], s); 
 	}
 	if(offset == -2 || offset == -1) return EOF;
 	pages->paddr = area.base_addr + (i << 22) + (offset << 12); // each buddy has 4MB size and each offset is 4KB
@@ -100,7 +102,7 @@ int page_alloc(struct pages *pages){
 void page_free(struct pages *pages) {
 	int buddyN = (pages->paddr - area.base_addr) >> 22;
 	int offset = ((pages->paddr - area.base_addr) >> 12) % 1024;
-	pages->size = buddy_size(&area.buddylist[buddyN], offset) << 12;
+	pages->size = buddy_size(area.buddylist[buddyN], offset) << 12;
 	if(pages->size > 0) 
 		area.page_num += pages->size;
 }
@@ -130,13 +132,15 @@ int page_allocator_init(void){
 	area.base_addr = PGROUNDUP(pmb[largest].BaseAddrLow);
 	area.page_num = pmb[i].LengthLow / 0x4096;
 	area.buddy_num = 1;
-	buddy_init(&area.buddylist[0], 10);
+	buddy_init(area.buddylist[0], 10);
 	return 0;
 }
 
 void buddy_init(struct buddy* self, int level) {
 	int size = 1 << level;
 	self->level = level;
+	if(self == NULL)
+		self = (struct buddy*)kmalloc(sizeof(struct buddy), 0);
 	//kprintf("level=%d, size=0x%x\n", self->level, size);
 	memset(self->tree , NODE_UNUSED , size*2-1);
 	return;
@@ -305,4 +309,13 @@ int buddy_size(struct buddy * self, int offset) {
 	}
 }
 
-int page_allocator_move(struct simple_allocator *old);
+int page_allocator_move(struct simple_allocator *old){
+	int i = 0;
+	for(i = 0; i < area.buddy_num; ++i){
+		void* tmp = (void*)kmalloc(sizeof(struct buddy), 0);
+		memcpy(tmp, area.buddylist[i], sizeof(struct buddy));
+		old->free(area.buddylist[i]);
+		area.buddylist[i] = tmp;
+	}
+	return 0;
+}
