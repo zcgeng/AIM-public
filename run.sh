@@ -1,7 +1,6 @@
 #!/bin/bash
 set -x
 
-make clean
 make
 
 # load the files into the hardisk

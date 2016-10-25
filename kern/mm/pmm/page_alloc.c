@@ -95,10 +95,10 @@ void test(){
 	}
     
 	buddy_init(area.buddylist, 10, PGROUNDUP(pmb[largest].BaseAddrLow));
-	kprintf("sdasdsada%d\n", area.buddylist[0].level);
 	for(i = 0; i < 10; ++i){
-		kprintf("%d:%d\n", i, buddy_alloc(&area.buddylist[0], i));
+		kprintf("%d:%d\n", i, buddy_alloc(&area.buddylist[0], 1));
 	}
+	panic("success");
 }
 
 
@@ -140,7 +140,6 @@ _mark_parent(struct buddy* self, int index) {
 }
 
 int buddy_alloc(struct buddy* self, int s) {
-	kprintf("llllllll = %d\n", self->level);
 	int size;
 	if (s==0) {
 		size = 1;
@@ -148,7 +147,7 @@ int buddy_alloc(struct buddy* self, int s) {
 		size = (int)next_pow_of_2(s);
 	}
 	int length = 1 << self->level;
-	kprintf("length=%d\n", length);
+	//kprintf("length=%d\n", length);
 	if (size > length)
 		return -1;
 
