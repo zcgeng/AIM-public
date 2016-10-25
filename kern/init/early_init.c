@@ -28,6 +28,7 @@
 #include <aim/mmu.h>
 #include <aim/panic.h>
 #include <aim/pmm.h>
+#include <aim/vmm.h>
 #include <drivers/io/io-mem.h>
 #include <drivers/io/io-port.h>
 #include <platform.h>
@@ -74,9 +75,14 @@ panic:
 }
 
 void high_address_entry(){
+	
 	struct page_allocator a = {
 		page_alloc, page_free, page_get_free
 	};
+	struct simple_allocator b = {
+		simple_alloc, simple_free, simple_size
+	};
 	set_page_allocator(&a);
+	set_simple_allocator(&b);
 	panic("succeed in high_address_entry!");
 }

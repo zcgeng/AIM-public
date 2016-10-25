@@ -316,5 +316,8 @@ void simple_free(void *ptr)
 }
 
 
-
+size_t simple_size(void *obj){
+	struct block_header* tmp = (struct block_header*) obj;
+	return tmp->vp.ubh_length;
+}
 

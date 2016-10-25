@@ -46,6 +46,11 @@ struct simple_allocator {
 	void (*free)(void *obj);
 	size_t (*size)(void *obj);
 };
+void * simple_alloc(size_t size, gfp_t priority);
+void simple_free(void *obj);
+size_t simple_size(void *obj);
+
+
 
 int simple_allocator_bootstrap(void *pt, size_t size);
 int simple_allocator_init(void);
