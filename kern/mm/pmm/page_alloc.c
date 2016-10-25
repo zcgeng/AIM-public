@@ -34,15 +34,14 @@ struct buddy {
 	uint8_t tree[1 << 10]; // fixed buddy size: 4M
 };
 
-typedef struct area{
+struct Area{
 	uint32_t base_addr;
 	uint32_t page_num;
+	uint32_t buddy_num;
 	struct buddy buddylist[10]; // TODO: change this into dynimic pointer
 };
 
-
-
-struct buddy my_buddy;
+struct Area area;
 
 #define NODE_UNUSED 0
 #define NODE_USED 1	
@@ -75,7 +74,7 @@ static inline int get_level(uint32_t page_num){
 		return i;
 }
 
-void buddy_init(int level, uint32_t baseAddr);
+void buddy_init(struct buddy* self, int level, uint32_t baseAddr);
 void test(){
     PMB* pmb = (PMB*)0x9004;
     int num = *(int *)0x9000;
@@ -93,17 +92,18 @@ void test(){
 		largest = i;
         }
     }
-    buddy_init(10, PGROUNDUP(pmb[largest].BaseAddrLow));
+    
+    buddy_init(&area.buddylist[0], 10, PGROUNDUP(pmb[largest].BaseAddrLow));
 }
 
 
 
-void buddy_init(int level, uint32_t baseAddr) {
+void buddy_init(struct buddy* self, int level, uint32_t baseAddr) {
 	int size = 1 << level;
-	my_buddy.level = level;
-	my_buddy.baseAddr = baseAddr;
+	self->level = level;
+	self->baseAddr = baseAddr;
 	kprintf("level=%d, baseaddr=0x%x, size=0x%x\n", level, baseAddr, size);
-	memset(my_buddy.tree , NODE_UNUSED , size*2-1);
+	memset(self->tree , NODE_UNUSED , size*2-1);
 	return;
 }
 
@@ -121,12 +121,12 @@ get_buddy_index(int index){
 }
 
 static void 
-_mark_parent(int index) {
+_mark_parent(struct buddy* self, int index) {
 	for (;;) {
 		int buddy = get_buddy_index(index);
-		if (buddy > 0 && (my_buddy.tree[buddy] == NODE_USED || my_buddy.tree[buddy] == NODE_FULL)) {
+		if (buddy > 0 && (self->tree[buddy] == NODE_USED || self->tree[buddy] == NODE_FULL)) {
 			index = (index + 1) / 2 - 1;
-			my_buddy.tree[index] = NODE_FULL;
+			self->tree[index] = NODE_FULL;
 		}
 		else {
 			return;
@@ -135,14 +135,14 @@ _mark_parent(int index) {
 }
 
 int 
-buddy_alloc(int s) {
+buddy_alloc(struct buddy* self, int s) {
 	int size;
 	if (s==0) {
 		size = 1;
 	} else {
 		size = (int)next_pow_of_2(s);
 	}
-	int length = 1 << my_buddy.level;
+	int length = 1 << self->level;
 
 	if (size > length)
 		return -1;
@@ -153,22 +153,22 @@ buddy_alloc(int s) {
 	// find size from the root
 	while (index >= 0) {
 		if (size == length) {
-			if (my_buddy.tree[index] == NODE_UNUSED) {
-				my_buddy.tree[index] = NODE_USED;
-				_mark_parent(index);
-				return _index_offset(index, level, my_buddy.level);
+			if (self->tree[index] == NODE_UNUSED) {
+				self->tree[index] = NODE_USED;
+				_mark_parent(self, index);
+				return _index_offset(index, level, self->level);
 			}
 		} else {
 			// size < length
-			switch (my_buddy.tree[index]) {
+			switch (self->tree[index]) {
 			case NODE_USED:
 			case NODE_FULL:
 				break;
 			case NODE_UNUSED:
 				// split first
-				my_buddy.tree[index] = NODE_SPLIT;
-				my_buddy.tree[index*2+1] = NODE_UNUSED;
-				my_buddy.tree[index*2+2] = NODE_UNUSED;
+				self->tree[index] = NODE_SPLIT;
+				self->tree[index*2+1] = NODE_UNUSED;
+				self->tree[index*2+2] = NODE_UNUSED;
 			default:
 				index = index * 2 + 1;
 				length /= 2;
@@ -200,13 +200,13 @@ buddy_alloc(int s) {
 }
 
 static void 
-_combine(int index) {
+_combine(struct buddy* self, int index) {
 	for (;;) {
 		int buddy = index - 1 + (index & 1) * 2;
-		if (buddy < 0 || my_buddy.tree[buddy] != NODE_UNUSED) {
-			my_buddy.tree[index] = NODE_UNUSED;
-			while (((index = (index + 1) / 2 - 1) >= 0) &&  my_buddy.tree[index] == NODE_FULL){
-				my_buddy.tree[index] = NODE_SPLIT;
+		if (buddy < 0 || self->tree[buddy] != NODE_UNUSED) {
+			self->tree[index] = NODE_UNUSED;
+			while (((index = (index + 1) / 2 - 1) >= 0) &&  self->tree[index] == NODE_FULL){
+				self->tree[index] = NODE_SPLIT;
 			}
 			return;
 		}
@@ -214,19 +214,19 @@ _combine(int index) {
 	}
 }
 
-void buddy_free(int offset) {
-	if( offset < (1<< my_buddy.level))
+void buddy_free(struct buddy* self, int offset) {
+	if( offset < (1<< self->level))
 		panic("offset %d is too large!", offset);
 	int left = 0;
-	int length = 1 << my_buddy.level;
+	int length = 1 << self->level;
 	int index = 0;
 
 	for (;;) {
-		switch (my_buddy.tree[index]) {
+		switch (self->tree[index]) {
 		case NODE_USED:
 			if(offset == left)
 				panic("offset == left == 0x%x!\n", offset);
-			_combine(index);
+			_combine(self, index);
 			return;
 		case NODE_UNUSED:
 			panic("Trying to free an unused page!\n");
