@@ -75,6 +75,7 @@ static inline int get_level(uint32_t page_num){
 }
 
 void buddy_init(struct buddy* self, int level, uint32_t baseAddr);
+void buddy_free(struct buddy* self, int offset);
 int buddy_alloc(struct buddy* self, int s);
 void test(){
 	PMB* pmb = (PMB*)0x9004;
@@ -95,19 +96,30 @@ void test(){
 	}
     
 	buddy_init(area.buddylist, 10, PGROUNDUP(pmb[largest].BaseAddrLow));
+int offset[10];
 	for(i = 0; i < 10; ++i){
-		kprintf("%d:%d\n", i, buddy_alloc(&area.buddylist[0], 1));
+		offset[i] = buddy_alloc(&area.buddylist[0], 4 * i);
+		kprintf("alloc-%d:%d\n", i, offset[i]);
+	}
+	for(i = 0; i < 10; ++i){
+		buddy_free(&area.buddylist[0], offset[i]);
+	}
+	for(i = 0; i < 10; ++i){
+		offset[i] = buddy_alloc(&area.buddylist[0], 4 * i);
+		kprintf("alloc-%d:%d\n", i, offset[i]);
+	}
+	for(i = 0; i < 10; ++i){
+		buddy_free(&area.buddylist[0], offset[i]);
 	}
 	panic("success");
 }
 
 
 
-void buddy_init(struct buddy* self, int level, uint32_t baseAddr) {
+void buddy_init(struct buddy* self, int level) {
 	int size = 1 << level;
 	self->level = level;
-	self->baseAddr = baseAddr;
-	kprintf("level=%d, baseaddr=0x%x, size=0x%x\n", self->level, self->baseAddr, size);
+	//kprintf("level=%d, size=0x%x\n", self->level, size);
 	memset(self->tree , NODE_UNUSED , size*2-1);
 	return;
 }
@@ -219,8 +231,8 @@ _combine(struct buddy* self, int index) {
 }
 
 void buddy_free(struct buddy* self, int offset) {
-	if( offset < (1<< self->level))
-		panic("offset %d is too large!", offset);
+	if( offset >= (1<< self->level))
+		panic("offset 0x%x is larger than %d levels of buddy!", offset, self->level);
 	int left = 0;
 	int length = 1 << self->level;
 	int index = 0;
@@ -228,12 +240,12 @@ void buddy_free(struct buddy* self, int offset) {
 	for (;;) {
 		switch (self->tree[index]) {
 		case NODE_USED:
-			if(offset == left)
-				panic("offset == left == 0x%x!\n", offset);
+			if(offset != left)
+				panic("offset(0x%x) != left(0x%x)!\n", offset, left);
 			_combine(self, index);
 			return;
 		case NODE_UNUSED:
-			panic("Trying to free an unused page!\n");
+			panic("Trying to free an unused block!\n");
 			return;
 		default:
 			length /= 2;
