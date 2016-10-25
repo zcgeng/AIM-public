@@ -163,19 +163,16 @@ void * simple_alloc(size_t size, gfp_t priority)
     {
         kprintf ("kmalloc: I refuse to allocate %d bytes (for now max = %d).\n",
                  size,MAX_KMALLOC_K*1024);
-        return (NULL);
+        return (EOF);
     }
 
     order = get_order (size);
     if (order < 0)
     {
         kprintf ("kmalloc of too large a block (%d bytes).\n",size);
-        return (NULL);
+        return (EOF);
     }
 
-
-    /* It seems VERY unlikely to me that it would be possible that this 
-    loop will get executed more than once. */
     tries = MAX_GET_FREE_PAGE_TRIES; 
     while (tries --)
     {
@@ -200,11 +197,11 @@ void * simple_alloc(size_t size, gfp_t priority)
                 return p+1; /* Pointer arithmetic: increments past header */
             }
             kprintf ("Problem: block on freelist at %08lx isn't free.\n",(long)p);
-            return (NULL);
+            return (EOF);
         }
 
 
-        /* Now we're in trouble: We need to get a new free page..... */
+        /* get a new free page */
 
         sz = BLOCKSIZE(order); /* sz is the size of the blocks we're dealing with */
 
@@ -213,7 +210,7 @@ void * simple_alloc(size_t size, gfp_t priority)
         if (!page) 
         {
             kprintf ("Couldn't get a free page.....\n");
-            return NULL;
+            return EOF;
         }
 
         sizes[order].npages++;
@@ -235,26 +232,12 @@ void * simple_alloc(size_t size, gfp_t priority)
     /* Now we're going to muck with the "global" freelist for this size:
     this should be uniterruptible */
 
-    /* 
-    * sizes[order].firstfree used to be NULL, otherwise we wouldn't be
-    * here, but you never know.... 
-    */
     page->next = sizes[order].firstfree;
     sizes[order].firstfree = page;
     }
 
-/* Pray that kprintf won't cause this to happen again :-) */
-
-kprintf ("Hey. This is very funny. I tried %d times to allocate a whole\n"
-         "new page for an object only %d bytes long, but some other process\n"
-         "beat me to actually allocating it. Also note that this 'error'\n"
-         "message is soooo very long to catch your attention. I'd appreciate\n"
-         "it if you'd be so kind as to report what conditions caused this to\n"
-         "the author of this kmalloc: wolff@dutecai.et.tudelft.nl.\n"
-         "(Executive summary: This can't happen)\n", 
-         MAX_GET_FREE_PAGE_TRIES,
-         size);
-return NULL;
+	panic("Try too much times!\n");
+	return EOF;
 }
 
 void simple_free(void *ptr)
