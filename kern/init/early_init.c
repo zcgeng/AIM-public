@@ -47,6 +47,7 @@ int early_devices_init(void)
 }
 
 void arch_early_init();
+void test();
 __noreturn
 void master_early_init(void)
 {
@@ -65,6 +66,7 @@ void master_early_init(void)
 	) < 0)
 		panic("Early console init failed.\n");
 	kputs("Hello, world!\n");
+	test();
 	arch_early_init();
 
 panic:
