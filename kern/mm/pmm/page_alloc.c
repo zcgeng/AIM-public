@@ -54,14 +54,36 @@ void test(){
 
 struct buddy {
 	int level;
-	uint8_t tree[1000];
+	uint8_t tree[40000];
 };
 
 struct buddy my_buddy;
 
 void buddy_init(int level) {
 	int size = 1 << level;
-	my_buddy->level = level;
-	memset(my_buddy->tree , NODE_UNUSED , size*2-1);
-	return self;
+	my_buddy.level = level;
+	memset(my_buddy.tree , NODE_UNUSED , size*2-1);
+	return;
+}
+
+void
+buddy_delete(struct buddy * self) {
+	free(self);
+}
+
+static inline int
+is_pow_of_2(uint32_t x) {
+	return !(x & (x-1));
+}
+
+static inline uint32_t
+next_pow_of_2(uint32_t x) {
+	if ( is_pow_of_2(x) )
+		return x;
+	x |= x>>1;
+	x |= x>>2;
+	x |= x>>4;
+	x |= x>>8;
+	x |= x>>16;
+	return x+1;
 }
