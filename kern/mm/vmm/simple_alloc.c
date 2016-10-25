@@ -160,6 +160,7 @@ int get_order (int size)
 
 void * simple_alloc(size_t size, gfp_t priority)
 {
+	kprintf("size=%d\n", size);
     int order,tries,i,sz;
     struct block_header *p;
     struct page_descriptor *page;

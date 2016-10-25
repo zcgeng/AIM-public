@@ -42,7 +42,7 @@ int page_alloc(struct pages *pages);
 void page_free(struct pages *pages);
 addr_t page_get_free(void);
 int page_allocator_init(void);
-int page_allocator_move(struct simple_allocator *old);
+int page_allocator_move();
 void set_page_allocator(struct page_allocator *allocator);
 /* The registration above COPIES the struct. */
 

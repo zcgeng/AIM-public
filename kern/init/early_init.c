@@ -84,5 +84,11 @@ void high_address_entry(){
 	};
 	set_page_allocator(&a);
 	set_simple_allocator(&b);
-	panic("succeed in high_address_entry!");
+	int pt[4096/4];
+	simple_allocator_bootstrap(pt, 4096);
+	page_allocator_init();
+	simple_allocator_init();
+	page_allocator_move();
+	pgalloc();
+	panic("succeed !");
 }

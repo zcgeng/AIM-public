@@ -40,7 +40,7 @@ struct Area{
 	uint32_t base_addr;
 	uint32_t page_num;
 	uint32_t buddy_num;
-	struct buddy* buddylist[100];
+	struct buddy** buddylist;
 };
 
 struct Area area;
@@ -82,14 +82,15 @@ int buddy_alloc(struct buddy* self, int s);
 int buddy_size(struct buddy * self, int offset);
 
 int page_alloc(struct pages *pages){
-	int i, offset = -2;
+	kprintf("page_alloc: pages->size=%d\n", pages->size);
+	int i, offset = -1;
 	int s = (pages->size + PGSIZE - 1) >> 12;
 	for(i = 0; i < area.buddy_num; ++i){
 		offset = buddy_alloc(area.buddylist[i], s);
 		if(offset >= 0) break;
 	}
 	if(offset == -1){
-		if(area.buddy_num == 100) return EOF;
+		if(area.buddy_num >= area.page_num / 1024) return EOF;
 		buddy_init(area.buddylist[area.buddy_num++], 10);
 		offset = buddy_alloc(area.buddylist[i], s); 
 	}
@@ -130,9 +131,9 @@ int page_allocator_init(void){
 		}
 	}
 	area.base_addr = PGROUNDUP(pmb[largest].BaseAddrLow);
-	area.page_num = pmb[i].LengthLow / 0x4096;
-	area.buddy_num = 1;
-	buddy_init(area.buddylist[0], 10);
+	area.page_num = pmb[largest].LengthLow / 4096;
+	area.buddylist = (struct buddy**)kmalloc(sizeof(void *) * (area.page_num / 1024), 0);
+	area.buddy_num = 0;
 	return 0;
 }
 
@@ -174,6 +175,7 @@ _mark_parent(struct buddy* self, int index) {
 }
 
 int buddy_alloc(struct buddy* self, int s) {
+	kprintf("buddy_alloc: s=%d\n", s);
 	int size;
 	if (s==0) {
 		size = 1;
@@ -309,13 +311,6 @@ int buddy_size(struct buddy * self, int offset) {
 	}
 }
 
-int page_allocator_move(struct simple_allocator *old){
-	int i = 0;
-	for(i = 0; i < area.buddy_num; ++i){
-		void* tmp = (void*)kmalloc(sizeof(struct buddy), 0);
-		memcpy(tmp, area.buddylist[i], sizeof(struct buddy));
-		old->free(area.buddylist[i]);
-		area.buddylist[i] = tmp;
-	}
+int page_allocator_move(){
 	return 0;
 }
