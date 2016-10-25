@@ -78,20 +78,6 @@ void buddy_init(struct buddy* self, int level);
 void buddy_free(struct buddy* self, int offset);
 int buddy_alloc(struct buddy* self, int s);
 int buddy_size(struct buddy * self, int offset);
-static int page_alloc(struct pages *pages);
-static void page_free(struct pages *pages);
-
-
-
-void test(){
-	page_allocator_init();
-	struct pages a = {0, 4097, 0};
-	page_alloc(&a);
-	kprintf("0x%x\n", a.paddr);
-	page_free(&a);
-	kprintf("0x%x\n", a.size);
-}
-
 
 static int page_alloc(struct pages *pages){
 	int i, offset = -2;
@@ -112,9 +98,8 @@ static int page_alloc(struct pages *pages){
 
 static void page_free(struct pages *pages) {
 	int buddyN = (pages->paddr - area.base_addr) >> 22;
-	int offset = ((pages->paddr + PGSIZE - 1) >> 12) % 1024;
-	kprintf("N=%d, offset=0x%x\n", buddyN, offset);
-	pages->size = buddy_size(&area.buddylist[buddyN], offset);
+	int offset = ((pages->paddr - area.base_addr) >> 12) % 1024;
+	pages->size = buddy_size(&area.buddylist[buddyN], offset) << 12;
 }
 
 
@@ -298,7 +283,7 @@ int buddy_size(struct buddy * self, int offset) {
 	for (;;) {
 		switch (self->tree[index]) {
 		case NODE_USED:
-			return EOF;
+			return length;
 		case NODE_UNUSED:
 			return EOF;
 		default:
