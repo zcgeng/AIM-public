@@ -26,10 +26,14 @@ typedef struct physical_memory_block{
     uint32_t Type; /* Address type of  this range */
 }PMB;
 
+#define PageBuddy(page) test_bit(PG_buddy, &(page)->flags)
+
+int area_n = 0;
 void test(){
     PMB* pmb = (PMB*)0x9004;
     int num = *(int *)0x9000;
-    int i;
+    int i, largest = 0;
+    int tmp = 0;
     kprintf("physical memory areas:\n");
     kprintf("BaseAddr\tLength\t\tType(1-usable by OS, 2-reserved address)\n");
     for(i = 0; i < num; ++i){
@@ -37,6 +41,28 @@ void test(){
                 pmb->BaseAddrLow,
                 pmb->LengthLow,
                 pmb->Type);
+        if(pmb->Type == 1 && pmb->LengthLow > tmp){
+		tmp = pmb->LengthLow;
+		largest = i;
+        }
         pmb++;
     }
 }
+
+static inline struct page* 
+__page_find_buddy(struct page* page, uint32_t page_idx, unsigned order){
+	uint32_t buddy_idx = page_idx ^ (1 << order);
+	return page + (buddy_idx - page_idx);
+}
+
+static inline int
+page_is_buddy(struct page* page, struct page* buddy, int order){
+	if(page_zone_id(page) != page_zone_id(buddy))
+		return 0;
+	if(PageBuddy(buddy) && page_order(buddy) == order){
+		return 1;
+	}
+	return 0;
+}
+
+
