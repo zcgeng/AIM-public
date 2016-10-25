@@ -75,25 +75,30 @@ static inline int get_level(uint32_t page_num){
 }
 
 void buddy_init(struct buddy* self, int level, uint32_t baseAddr);
+int buddy_alloc(struct buddy* self, int s);
 void test(){
-    PMB* pmb = (PMB*)0x9004;
-    int num = *(int *)0x9000;
-    int i, largest = 0;
-    int tmp = 0;
-    kprintf("physical memory areas:\n");
-    kprintf("BaseAddr\tLength\t\tType(1-usable by OS, 2-reserved address)\n");
-    for(i = 0; i < num; ++i){
+	PMB* pmb = (PMB*)0x9004;
+	int num = *(int *)0x9000;
+	int i, largest = 0;
+	int tmp = 0;
+	kprintf("physical memory areas:\n");
+	kprintf("BaseAddr\tLength\t\tType(1-usable by OS, 2-reserved address)\n");
+	for(i = 0; i < num; ++i){
         kprintf("0x%8x\t0x%8x\t0x%x\n", 
                 pmb[i].BaseAddrLow,
                 pmb[i].LengthLow,
                 pmb[i].Type);
-        if(pmb[i].Type == 1 && pmb[i].LengthLow > tmp){
-		tmp = pmb[i].LengthLow;
-		largest = i;
-        }
-    }
+		if(pmb[i].Type == 1 && pmb[i].LengthLow > tmp){
+			tmp = pmb[i].LengthLow;
+			largest = i;
+		}
+	}
     
-    buddy_init(&area.buddylist[0], 10, PGROUNDUP(pmb[largest].BaseAddrLow));
+	buddy_init(area.buddylist, 10, PGROUNDUP(pmb[largest].BaseAddrLow));
+	kprintf("sdasdsada%d\n", area.buddylist[0].level);
+	for(i = 0; i < 10; ++i){
+		kprintf("%d:%d\n", i, buddy_alloc(&area.buddylist[0], i));
+	}
 }
 
 
@@ -102,7 +107,7 @@ void buddy_init(struct buddy* self, int level, uint32_t baseAddr) {
 	int size = 1 << level;
 	self->level = level;
 	self->baseAddr = baseAddr;
-	kprintf("level=%d, baseaddr=0x%x, size=0x%x\n", level, baseAddr, size);
+	kprintf("level=%d, baseaddr=0x%x, size=0x%x\n", self->level, self->baseAddr, size);
 	memset(self->tree , NODE_UNUSED , size*2-1);
 	return;
 }
@@ -134,8 +139,8 @@ _mark_parent(struct buddy* self, int index) {
 	}
 }
 
-int 
-buddy_alloc(struct buddy* self, int s) {
+int buddy_alloc(struct buddy* self, int s) {
+	kprintf("llllllll = %d\n", self->level);
 	int size;
 	if (s==0) {
 		size = 1;
@@ -143,7 +148,7 @@ buddy_alloc(struct buddy* self, int s) {
 		size = (int)next_pow_of_2(s);
 	}
 	int length = 1 << self->level;
-
+	kprintf("length=%d\n", length);
 	if (size > length)
 		return -1;
 

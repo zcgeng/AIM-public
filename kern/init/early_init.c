@@ -66,7 +66,6 @@ void master_early_init(void)
 	) < 0)
 		panic("Early console init failed.\n");
 	kputs("Hello, world!\n");
-	test();
 	arch_early_init();
 
 panic:
