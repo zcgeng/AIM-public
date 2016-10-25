@@ -304,3 +304,5 @@ int buddy_size(struct buddy * self, int offset) {
 		}
 	}
 }
+
+int page_allocator_move(struct simple_allocator *old);

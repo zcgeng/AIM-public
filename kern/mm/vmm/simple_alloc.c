@@ -113,12 +113,13 @@ struct size_descriptor sizes[] = {
 #define NBLOCKS(order)          (sizes[order].nblocks)
 #define BLOCKSIZE(order)        (sizes[order].size)
 
-
-
+int is_page_alloc_on;
+void* tmp_mem_pt;
 int simple_allocator_bootstrap(void *pt, size_t size)
 {
     int order;
-
+	is_page_alloc_on = 0;
+	tmp_mem_pt = pt;
     /* 
     * Check the static info array. Things will blow up terribly if it's
     * incorrect. This is a late "compile time" check.....
@@ -139,6 +140,10 @@ int simple_allocator_bootstrap(void *pt, size_t size)
     return 0;
 }
 
+int simple_allocator_init(void){
+	is_page_alloc_on = 1;
+	return 0;
+}
 
 
 int get_order (int size)
@@ -163,14 +168,14 @@ void * simple_alloc(size_t size, gfp_t priority)
     {
         kprintf ("kmalloc: I refuse to allocate %d bytes (for now max = %d).\n",
                  size,MAX_KMALLOC_K*1024);
-        return (EOF);
+        return (NULL);
     }
 
     order = get_order (size);
     if (order < 0)
     {
         kprintf ("kmalloc of too large a block (%d bytes).\n",size);
-        return (EOF);
+        return (NULL);
     }
 
     tries = MAX_GET_FREE_PAGE_TRIES; 
@@ -197,7 +202,7 @@ void * simple_alloc(size_t size, gfp_t priority)
                 return p+1; /* Pointer arithmetic: increments past header */
             }
             kprintf ("Problem: block on freelist at %08lx isn't free.\n",(long)p);
-            return (EOF);
+            return (NULL);
         }
 
 
@@ -205,12 +210,14 @@ void * simple_alloc(size_t size, gfp_t priority)
 
         sz = BLOCKSIZE(order); /* sz is the size of the blocks we're dealing with */
 
-        /* This can be done with ints on: This is private to this invocation */
-        page = (struct page_descriptor *) (uint32_t)pgalloc();
+	if(!is_page_alloc_on)
+		page = (struct page_descriptor *)tmp_mem_pt;
+	else
+        	page = (struct page_descriptor *) (uint32_t)pgalloc();
         if (!page) 
         {
             kprintf ("Couldn't get a free page.....\n");
-            return EOF;
+            return NULL;
         }
 
         sizes[order].npages++;
@@ -236,12 +243,13 @@ void * simple_alloc(size_t size, gfp_t priority)
     sizes[order].firstfree = page;
     }
 
-	panic("Try too much times!\n");
-	return EOF;
+	panic("Try too many times!\n");
+	return NULL;
 }
 
 void simple_free(void *ptr)
 {
+	if(!is_page_alloc_on) return;
     int order;
     register struct block_header *p=((struct block_header *)ptr) -1;
     struct page_descriptor *page,*pg2;
