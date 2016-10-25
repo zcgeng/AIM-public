@@ -177,3 +177,47 @@ buddy_alloc(int s) {
 
 	return -1;
 }
+
+static void 
+_combine(int index) {
+	for (;;) {
+		int buddy = index - 1 + (index & 1) * 2;
+		if (buddy < 0 || my_buddy->tree[buddy] != NODE_UNUSED) {
+			my_buddy->tree[index] = NODE_UNUSED;
+			while (((index = (index + 1) / 2 - 1) >= 0) &&  my_buddy->tree[index] == NODE_FULL){
+				my_buddy->tree[index] = NODE_SPLIT;
+			}
+			return;
+		}
+		index = (index + 1) / 2 - 1;
+	}
+}
+
+void
+buddy_free(int offset) {
+	assert( offset < (1<< my_buddy->level));
+	int left = 0;
+	int length = 1 << my_buddy->level;
+	int index = 0;
+
+	for (;;) {
+		switch (my_buddy->tree[index]) {
+		case NODE_USED:
+			assert(offset == left);
+			_combine(my_buddy, index);
+			return;
+		case NODE_UNUSED:
+			assert(0);
+			return;
+		default:
+			length /= 2;
+			if (offset < left + length) {
+				index = index * 2 + 1;
+			} else {
+				left += length;
+				index = index * 2 + 2;
+			}
+			break;
+		}
+	}
+}
