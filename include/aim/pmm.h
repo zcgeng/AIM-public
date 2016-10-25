@@ -23,7 +23,7 @@
 #include <aim/gfp.h>
 
 #ifndef __ASSEMBLER__
-
+#define PAGE_SIZE 4096
 struct pages {
 	addr_t paddr;
 	lsize_t size;
