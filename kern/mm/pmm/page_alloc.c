@@ -79,7 +79,7 @@ void buddy_free(struct buddy* self, int offset);
 int buddy_alloc(struct buddy* self, int s);
 int buddy_size(struct buddy * self, int offset);
 
-static int page_alloc(struct pages *pages){
+int page_alloc(struct pages *pages){
 	int i, offset = -2;
 	int s = (pages->size + PGSIZE - 1) >> 12;
 	for(i = 0; i < area.buddy_num; ++i){
@@ -93,15 +93,21 @@ static int page_alloc(struct pages *pages){
 	}
 	if(offset == -2 || offset == -1) return EOF;
 	pages->paddr = area.base_addr + (i << 22) + (offset << 12); // each buddy has 4MB size and each offset is 4KB
+	area.page_num -= s;
 	return 0;
 }
 
-static void page_free(struct pages *pages) {
+void page_free(struct pages *pages) {
 	int buddyN = (pages->paddr - area.base_addr) >> 22;
 	int offset = ((pages->paddr - area.base_addr) >> 12) % 1024;
 	pages->size = buddy_size(&area.buddylist[buddyN], offset) << 12;
+	if(pages->size > 0) 
+		area.page_num += pages->size;
 }
 
+addr_t page_get_free(void){
+	return area.page_num << 12;
+}
 
 int page_allocator_init(void){
 	// get memory infomation saved by boot loader
