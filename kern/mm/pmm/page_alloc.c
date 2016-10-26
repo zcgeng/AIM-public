@@ -112,6 +112,7 @@ addr_t page_get_free(void){
 	return area.page_num << 12;
 }
 
+extern uint32_t _end;
 int page_allocator_init(void){
 	// get memory infomation saved by boot loader
 	PMB* pmb = (PMB*)0x9004;
@@ -132,6 +133,11 @@ int page_allocator_init(void){
 	}
 	area.base_addr = PGROUNDUP(pmb[largest].BaseAddrLow);
 	area.page_num = pmb[largest].LengthLow / 4096;
+	uint32_t end = premap_addr((uint32_t)&_end);
+	if(area.base_addr < end){
+		area.base_addr = PGROUNDUP(end);
+		area.page_num -= (area.base_addr - end) / 4096; 
+	}
 	area.buddylist = (struct buddy**)kmalloc(sizeof(void *) * (area.page_num / 1024), 0);
 	area.buddy_num = 0;
 	return 0;
