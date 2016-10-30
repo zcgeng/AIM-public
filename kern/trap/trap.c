@@ -53,3 +53,10 @@ void handle_interrupt(int irq)
 	kpdebug("<IRQ %d>\n", irq);
 }
 
+void trap_init(void){
+    // interrupt table preparation
+    
+    // LAPIC & IOPAC
+    
+    // ban the outside interruptions
+}
