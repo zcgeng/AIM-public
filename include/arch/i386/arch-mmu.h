@@ -118,6 +118,7 @@ struct segdesc {
   (uint)(lim) >> 16, 0, 0, 1, 0, (uint)(base) >> 24 }
 #endif
 
+#define DPL_KERNEL  0
 #define DPL_USER    0x3     // User DPL
 
 // Application segment type bits
