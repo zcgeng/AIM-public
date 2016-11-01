@@ -169,7 +169,7 @@ add_irq_handle(int irq, void (*func)(void) ) {
 	handles[irq] = ptr;
 }
 
-void irq_handle(TrapFrame *tf) {
+void irq_handle(struct TrapFrame *tf) {
 	int irq = tf->irq;
 
 	if (irq < 0) {

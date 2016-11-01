@@ -31,6 +31,13 @@ void __local_panic(void);
 __noreturn
 void panic(const char *fmt, ...);
 
+#define assert(cond) \
+do { \
+	if(!(cond)) { \
+		panic("Assertion failed: %s", #cond); \
+	} \
+} while(0)
+
 /* Arch/mach-dependent code */
 void panic_other_cpus(void);
 
