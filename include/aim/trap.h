@@ -23,8 +23,7 @@ struct trapframe;
 
 void trap_init(void);
 
-__noreturn
-void trap_return(struct trapframe *tf);
+void trap_return(long value, struct TrapFrame *tf);
 
 long handle_syscall(long number, ...);
 void handle_interrupt(int irq);

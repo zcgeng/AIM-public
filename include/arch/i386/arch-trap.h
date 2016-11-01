@@ -27,6 +27,10 @@ struct TrapFrame {
 	uint32_t error_code, eip, cs, eflags;
 };
 
+void i8259_init(void);
+void idt_init();
+void irq_handle(struct TrapFrame *tf);
+
 #endif	/* !__ASSEMBLER__ */
 
 #endif /* _ARCH_TRAP_H */
