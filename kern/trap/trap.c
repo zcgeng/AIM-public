@@ -91,18 +91,105 @@ static void set_trap(struct gatedesc *ptr, uint32_t selector, uint32_t offset, u
 	ptr->off_31_16 = (offset >> 16) & 0xFFFF;
 }
 
+void irq0();
+void irq1();
+void irq14();
+void vec0();
+void vec1();
+void vec2();
+void vec3();
+void vec4();
+void vec5();
+void vec6();
+void vec7();
+void vec8();
+void vec9();
+void vec10();
+void vec11();
+void vec12();
+void vec13();
+void vec14();
+void vecsys();
+
+void irq_empty();
+
 static void idt_init(){
 	int i;
 	for (i = 0; i < NR_IRQ; i ++) {
-		set_trap(idt + i, SEG_KCODE << 3, (uint32_t)trap_panic, DPL_KERNEL);
+		set_trap(idt + i, SEG_KCODE << 3, (uint32_t)irq_empty, DPL_KERNEL);
 	}
+	set_trap(idt + 0, SEG_KCODE << 3, (uint32_t)vec0, DPL_KERNEL);
+	set_trap(idt + 1, SEG_KCODE << 3, (uint32_t)vec1, DPL_KERNEL);
+	set_trap(idt + 2, SEG_KCODE << 3, (uint32_t)vec2, DPL_KERNEL);
+	set_trap(idt + 3, SEG_KCODE << 3, (uint32_t)vec3, DPL_KERNEL);
+	set_trap(idt + 4, SEG_KCODE << 3, (uint32_t)vec4, DPL_KERNEL);
+	set_trap(idt + 5, SEG_KCODE << 3, (uint32_t)vec5, DPL_KERNEL);
+	set_trap(idt + 6, SEG_KCODE << 3, (uint32_t)vec6, DPL_KERNEL);
+	set_trap(idt + 7, SEG_KCODE << 3, (uint32_t)vec7, DPL_KERNEL);
+	set_trap(idt + 8, SEG_KCODE << 3, (uint32_t)vec8, DPL_KERNEL);
+	set_trap(idt + 9, SEG_KCODE << 3, (uint32_t)vec9, DPL_KERNEL);
+	set_trap(idt + 10, SEG_KCODE << 3, (uint32_t)vec10, DPL_KERNEL);
+	set_trap(idt + 11, SEG_KCODE << 3, (uint32_t)vec11, DPL_KERNEL);
+	set_trap(idt + 12, SEG_KCODE << 3, (uint32_t)vec12, DPL_KERNEL);
+	set_trap(idt + 13, SEG_KCODE << 3, (uint32_t)vec13, DPL_KERNEL);
+	set_trap(idt + 14, SEG_KCODE << 3, (uint32_t)vec14, DPL_KERNEL);
+
 	/* the system call 0x80 */
-	set_trap(idt + 0x80, SEG_KERNEL_CODE << 3, (uint32_t)handle_syscall, DPL_USER);
-	set_intr(idt+32 + 0, SEG_KCODE << 3, (uint32_t)handle_interrupt, DPL_KERNEL);
+	set_trap(idt + 0x80, SEG_KCODE << 3, (uint32_t)vecsys, DPL_USER);
+
+	set_intr(idt+32 + 0, SEG_KCODE << 3, (uint32_t)irq0, DPL_KERNEL);
+	set_intr(idt+32 + 1, SEG_KCODE << 3, (uint32_t)irq1, DPL_KERNEL);
+	set_intr(idt+32 + 14, SEG_KCODE << 3, (uint32_t)irq14, DPL_KERNEL);
 
 	/* the ``idt'' is its virtual address */
 	write_idtr(idt, sizeof(idt));
 }
+
+#define NR_IRQ_HANDLE 32
+#define NR_HARD_INTR 16
+
+struct IRQ_t {
+	void (*routine)(void);
+	struct IRQ_t *next;
+};
+
+static struct IRQ_t handle_pool[NR_IRQ_HANDLE];
+static struct IRQ_t *handles[NR_HARD_INTR];
+static int handle_count = 0;
+
+void
+add_irq_handle(int irq, void (*func)(void) ) {
+	assert(irq < NR_HARD_INTR);
+	assert(handle_count <= NR_IRQ_HANDLE);
+
+	struct IRQ_t *ptr;
+	ptr = &handle_pool[handle_count ++]; /* get a free handler */
+	ptr->routine = func;
+	ptr->next = handles[irq]; /* insert into the linked list */
+	handles[irq] = ptr;
+}
+
+void irq_handle(TrapFrame *tf) {
+	int irq = tf->irq;
+
+	if (irq < 0) {
+		/* "irq_empty" pushed -1 in the trapframe*/
+		panic("Unhandled exception!");
+	} else if (irq == 0x80) {
+		handle_syscall(tf);
+	} else if (irq < 1000) {
+		panic("Unexpected exception #%d at eip = %x", irq, tf->eip);
+	} else if (irq >= 1000) {
+		int irq_id = irq - 1000;
+		struct IRQ_t *f = handles[irq_id];
+
+		while (f != NULL) { /* call handlers one by one */
+			f->routine(); 
+			f = f->next;
+		}
+	}
+}
+
 
 void trap_init(void){
 

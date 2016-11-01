@@ -21,5 +21,6 @@ noinst_LTLIBRARIES = \
 	libtrap.la
 
 libtrap_la_SOURCES = \
-	trap.c
+	trap.c \
+	do_irq.S
 
