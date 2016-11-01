@@ -30,6 +30,7 @@
 #include <aim/panic.h>
 #include <arch-trap.h>
 
+//TODO: move those ****ing things to folder i386
 long handle_syscall(long number, ...)
 {
 	va_list ap;
@@ -149,7 +150,7 @@ void irq_handle(struct TrapFrame *tf) {
 		/* "irq_empty" pushed -1 in the trapframe*/
 		panic("Unhandled exception!");
 	} else if (irq == 0x80) {
-		handle_syscall(tf);
+		handle_syscall(irq, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp); //i386 specific
 	} else{
 		handle_interrupt(irq);
 	}
