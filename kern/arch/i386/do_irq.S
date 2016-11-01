@@ -61,7 +61,7 @@ asm_do_irq:
   movw %ax, %ds
   movw %ax, %es
 
-  # Call trap(tf), where tf=%esp
+  # Call irq_handle(tf), where tf=%esp
   pushl %esp
   call irq_handle
   addl $4, %esp
