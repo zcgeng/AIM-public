@@ -91,6 +91,6 @@ void high_address_entry(){
 	simple_allocator_init();
 	page_allocator_move();
 	trap_init();
-	asm("sti;int $0x80;");
+	asm("mov $1, %eax; int $0x80;");
 	panic("succeed !");
 }
