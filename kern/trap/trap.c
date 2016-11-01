@@ -182,14 +182,15 @@ void i8259_init(void) {
 }
 
 void trap_init(void){ // i386 specific
+	/* forbid the outside interruptions 
+	 * (but how to "forbid it one by one"?) */
+	asm("cli;");
 
 	/* interrupt table preparation */
 	idt_init();
 
 	/* LAPIC & IOAPAC : I think it means opening something 
-	 * called i8259 so I copied some asm code to turn it on
-	 */
+	 * called i8259 so I copied some code from ics-NEMU to turn it on.
+	 * But I don't know how i8259 works and I don't want to know. */
 	i8259_init();
-
-	/* forbid the outside interruptions */
 }
