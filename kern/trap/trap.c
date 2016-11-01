@@ -113,7 +113,7 @@ void vecsys();
 
 void irq_empty();
 
-static void idt_init(){
+static void idt_init(){ // i386 specific
 	int i;
 	for (i = 0; i < NR_IRQ; i ++) {
 		set_trap(idt + i, SEG_KCODE << 3, (uint32_t)irq_empty, DPL_KERNEL);
