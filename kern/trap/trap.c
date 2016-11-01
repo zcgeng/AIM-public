@@ -194,3 +194,7 @@ void trap_init(void){ // i386 specific
 	 * But I don't know how i8259 works and I don't want to know. */
 	i8259_init();
 }
+
+void trap_return(){
+
+}
