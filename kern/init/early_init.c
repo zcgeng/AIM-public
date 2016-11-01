@@ -90,11 +90,7 @@ void high_address_entry(){
 	page_allocator_init();
 	simple_allocator_init();
 	page_allocator_move();
-	int i = 0;
-	for(i = 0; i < 10; ++i){
-		uint32_t addr = (uint32_t)kmalloc(1024, 0);
-		kprintf("addr = 0x%x\n", addr);
-	}
 	trap_init();
+	asm("int 0x1;");
 	panic("succeed !");
 }

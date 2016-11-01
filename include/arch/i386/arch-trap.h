@@ -30,6 +30,7 @@ struct TrapFrame {
 void i8259_init(void);
 void idt_init();
 void irq_handle(struct TrapFrame *tf);
+void arch_trap_init();
 
 #endif	/* !__ASSEMBLER__ */
 

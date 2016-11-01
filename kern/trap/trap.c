@@ -64,9 +64,7 @@ void trap_init(void){
 
 	/* interrupt table preparation */
 	idt_init();
-
-	/* LAPIC & IOAPAC : I think it means opening something 
-	 * called i8259 so I copied some code from ics-NEMU to turn it on.
-	 * But I don't know how i8259 works and I don't want to know. */
-	i8259_init();
+	
+	/* do some arch dependent things here */
+	arch_trap_init();
 }
