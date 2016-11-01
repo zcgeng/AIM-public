@@ -205,6 +205,16 @@ void outl(uint16_t port, uint8_t data)
 	asm volatile("out %%eax, %%dx" : : "a"(data), "d"(port));
 }
 
+/* modify the value of IDTR */
+static inline void
+write_idtr(void *addr, uint32_t size) {
+	static volatile uint16_t data[3];
+	data[0] = size - 1;
+	data[1] = (uint32_t)addr;
+	data[2] = ((uint32_t)addr) >> 16;
+	asm volatile("lidt (%0)" : : "r"(data));
+}
+
 struct segdesc;
 static inline void
 lgdt(struct segdesc *p, int size)
