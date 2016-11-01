@@ -196,5 +196,5 @@ void trap_init(void){ // i386 specific
 }
 
 void trap_return(){
-
+	
 }

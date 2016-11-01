@@ -26,13 +26,10 @@
 .globl asm_do_irq
 .extern irq_handle
 
-# The follow code is *VERY* important for interrupts and exceptions handling.
-# You should make yourself understand it clearly.
-
 asm_do_irq:
 	pushal
 
-	pushl %esp		# ???
+	pushl %esp		# make the stack address be the argument of irq_handle
 	call irq_handle
 	
 	addl $4, %esp
