@@ -59,30 +59,30 @@ void handle_interrupt(int irq)
 #define NR_IRQ              256
 
 /* Each entry of the IDT is either an interrupt gate, or a trap gate */
-static gatedesc idt[NR_IRQ];
+static struct gatedesc idt[NR_IRQ];
 
 /* Setup a interrupt gate for interrupt handler. */
-static void set_intr(GateDesc *ptr, uint32_t selector, uint32_t offset, uint32_t dpl) {
-	ptr->offset_15_0 = offset & 0xFFFF;
-	ptr->segment = selector;
-	ptr->pad0 = 0;
+static void set_intr(struct gatedesc *ptr, uint32_t selector, uint32_t offset, uint32_t dpl) {
+	ptr->off_15_0 = offset & 0xFFFF;
+	ptr->cs = selector;
+	ptr->args = 0;
 	ptr->type = INTERRUPT_GATE_32;
-	ptr->system = 0;
-	ptr->privilege_level = dpl;
-	ptr->present = 1;
-	ptr->offset_31_16 = (offset >> 16) & 0xFFFF;
+	ptr->s = 0;
+	ptr->dpl = dpl;
+	ptr->p = 1;
+	ptr->off_31_16 = (offset >> 16) & 0xFFFF;
 }
 
 /* Setup a trap gate for cpu exception. */
-static void set_trap(GateDesc *ptr, uint32_t selector, uint32_t offset, uint32_t dpl) {
-	ptr->offset_15_0 = offset & 0xFFFF;
-	ptr->segment = selector;
-	ptr->pad0 = 0;
+static void set_trap(struct gatedesc *ptr, uint32_t selector, uint32_t offset, uint32_t dpl) {
+	ptr->off_15_0 = offset & 0xFFFF;
+	ptr->cs = selector;
+	ptr->args = 0;
 	ptr->type = TRAP_GATE_32;
-	ptr->system = 0;
-	ptr->privilege_level = dpl;
-	ptr->present = 1;
-	ptr->offset_31_16 = (offset >> 16) & 0xFFFF;
+	ptr->s = 0;
+	ptr->dpl = dpl;
+	ptr->p = 1;
+	ptr->off_31_16 = (offset >> 16) & 0xFFFF;
 }
 
 void irq0();
@@ -107,10 +107,10 @@ void vecsys();
 
 void irq_empty();
 
-void idt_init(){
+static void idt_init(){
 	int i;
 	for (i = 0; i < NR_IRQ; i ++) {
-		set_trap(idt + i, SEG_KERNEL_CODE << 3, (uint32_t)irq_empty, DPL_KERNEL);
+		set_trap(idt + i, SEG_KERNEL_CODE << 3, (uint32_t)handle_syscall, DPL_KERNEL);
 	}
 	set_trap(idt + 0, SEG_KERNEL_CODE << 3, (uint32_t)vec0, DPL_KERNEL);
 	set_trap(idt + 1, SEG_KERNEL_CODE << 3, (uint32_t)vec1, DPL_KERNEL);
