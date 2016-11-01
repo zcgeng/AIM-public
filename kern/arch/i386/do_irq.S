@@ -19,7 +19,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-.text
+#include <arch-mmu.h>
 #----|-----entry------|-errorcode-|-----id-----|---handler---|
 .globl vec0;    vec0:   pushl $0;  pushl    $0; jmp asm_do_irq
 .globl vec1;    vec1:   pushl $0;  pushl    $1; jmp asm_do_irq
@@ -49,13 +49,31 @@
 .extern irq_handle
 
 asm_do_irq:
-	pushal
+	# Build trap frame.
+  pushl %ds
+  pushl %es
+  pushl %fs
+  pushl %gs
+  pushal
+  
+  # Set up data segments.
+  movw $(SEG_KDATA<<3), %ax
+  movw %ax, %ds
+  movw %ax, %es
 
-	pushl %esp		# make the stack address be the argument of irq_handle
-	call irq_handle
-	
-	addl $4, %esp
-	popal
-	addl $8, %esp
-	iret
+  # Call trap(tf), where tf=%esp
+  pushl %esp
+  call irq_handle
+  addl $4, %esp
+
+  # Return falls through to trapret...
+.globl trapret
+trapret:
+  popal
+  popl %gs
+  popl %fs
+  popl %es
+  popl %ds
+  addl $0x8, %esp  # trapno and errcode
+  iret
 	

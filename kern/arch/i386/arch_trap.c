@@ -106,7 +106,7 @@ void idt_init(){ // i386 specific
 }
 
 void irq_handle(struct TrapFrame *tf) {
-	int irq = tf->irq;
+	int irq = tf->trapno;
 
 	if (irq < 0) {
 		/* "irq_empty" pushed -1 in the trapframe*/
