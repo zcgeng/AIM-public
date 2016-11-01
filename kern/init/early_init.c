@@ -32,6 +32,7 @@
 #include <drivers/io/io-mem.h>
 #include <drivers/io/io-port.h>
 #include <platform.h>
+#include <aim/trap.h>
 
 static inline
 int early_devices_init(void)
@@ -94,5 +95,6 @@ void high_address_entry(){
 		uint32_t addr = (uint32_t)kmalloc(1024, 0);
 		kprintf("addr = 0x%x\n", addr);
 	}
+	trap_init();
 	panic("succeed !");
 }
