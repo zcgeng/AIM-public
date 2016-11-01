@@ -19,7 +19,7 @@
 #ifndef _AIM_TRAP_H
 #define _AIM_TRAP_H
 
-struct trapframe;
+struct TrapFrame;
 
 void trap_init(void);
 
