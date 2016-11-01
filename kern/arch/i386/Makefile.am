@@ -30,4 +30,7 @@ libarch_la_SOURCES = \
 	arch_early_init.c \
 	arch_mmu.c \
 	arch_trap.c \
+	ioapic.c\
+	lapic.c \
+	picirq.c \
 	do_irq.S

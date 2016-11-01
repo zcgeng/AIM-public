@@ -64,7 +64,4 @@ void trap_init(void){
 
 	/* interrupt table preparation */
 	idt_init();
-	
-	/* do some arch dependent things here */
-	arch_trap_init();
 }

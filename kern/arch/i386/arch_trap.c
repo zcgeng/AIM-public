@@ -145,8 +145,3 @@ void i8259_init(void) {
 void trap_return(long value, struct TrapFrame *tf){
 	tf->eax = value;
 }
-
-void arch_trap_init(){
-	//init_apic_mappings(); // I don't know what is it. I just learned it from linux.
-}
-

@@ -75,6 +75,9 @@ panic:
 	panic("panic in early_init.c !");
 }
 
+void lapicinit();
+void picinit();
+void ioapicinit();
 void high_address_entry(){
 	
 	struct page_allocator a = {
@@ -90,6 +93,9 @@ void high_address_entry(){
 	page_allocator_init();
 	simple_allocator_init();
 	page_allocator_move();
+	lapicinit();     // interrupt controller
+	picinit();       // another interrupt controller
+	ioapicinit();    // another interrupt controller
 	trap_init();
 	asm("mov $1, %eax; int $0x80;");
 	panic("succeed !");
