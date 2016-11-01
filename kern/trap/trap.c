@@ -49,7 +49,7 @@ long handle_syscall(long number, ...)
 		}
 	}
 	va_end(ap);
-
+	
 	return 0;
 }
 
@@ -152,7 +152,8 @@ void irq_handle(struct TrapFrame *tf) {
 		/* "irq_empty" pushed -1 in the trapframe*/
 		panic("Unhandled exception!");
 	} else if (irq == 0x80) {
-		handle_syscall(tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp); // i386 specific
+		long value = handle_syscall(tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp); // i386 specific
+		trap_return(value, tf);
 	} else{
 		handle_interrupt(irq);
 	}
@@ -195,6 +196,6 @@ void trap_init(void){ // i386 specific
 	i8259_init();
 }
 
-void trap_return(){
-	
+void trap_return(long value, struct TrapFrame *tf){
+	tf->eax = value;
 }
