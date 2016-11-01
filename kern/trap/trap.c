@@ -158,12 +158,38 @@ void irq_handle(struct TrapFrame *tf) {
 	}
 }
 
+#define PORT_PIC_MASTER 0x20
+#define PORT_PIC_SLAVE  0xA0
+#define IRQ_SLAVE       2
+void i8259_init(void) {
+	/* mask all interrupts */
+	outb(PORT_PIC_MASTER + 1, 0xFF);
+	outb(PORT_PIC_SLAVE + 1 , 0xFF);
+	
+	/* start initialization */
+	outb(PORT_PIC_MASTER, 0x11);
+	outb(PORT_PIC_MASTER + 1, 32);
+	outb(PORT_PIC_MASTER + 1, 1 << 2);
+	outb(PORT_PIC_MASTER + 1, 0x3);
+	outb(PORT_PIC_SLAVE, 0x11);
+	outb(PORT_PIC_SLAVE + 1, 32 + 8);
+	outb(PORT_PIC_SLAVE + 1, 2);
+	outb(PORT_PIC_SLAVE + 1, 0x3);
+	outb(PORT_PIC_MASTER, 0x68);
+	outb(PORT_PIC_MASTER, 0x0A);
+	outb(PORT_PIC_SLAVE, 0x68);
+	outb(PORT_PIC_SLAVE, 0x0A);
+}
 
 void trap_init(void){ // i386 specific
 
-	// interrupt table preparation
+	/* interrupt table preparation */
 	idt_init();
-	// LAPIC & IOAPAC
-	
-	// forbid the outside interruptions
+
+	/* LAPIC & IOAPAC : I think it means opening something 
+	 * called i8259 so I copied some asm code to turn it on
+	 */
+	i8259_init();
+
+	/* forbid the outside interruptions */
 }
