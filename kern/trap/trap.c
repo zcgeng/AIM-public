@@ -30,7 +30,6 @@
 #include <aim/panic.h>
 #include <arch-trap.h>
 
-//TODO: move those ****ing things to folder i386
 long handle_syscall(long number, ...)
 {
 	va_list ap;
