@@ -62,10 +62,10 @@ void handle_interrupt(int irq)
 #define TRAP_GATE_32        0xF
 #define NR_IRQ              256
 
-/* Each entry of the IDT is either an interrupt gate, or a trap gate */
+/* Each entry of the IDT is either an interrupt gate, or a trap gate */ // i386 specific
 static struct gatedesc idt[NR_IRQ];
 
-/* Setup a interrupt gate for interrupt handler. */
+/* Setup a interrupt gate for interrupt handler. */ // i386 specific
 static void set_intr(struct gatedesc *ptr, uint32_t selector, uint32_t offset, uint32_t dpl) {
 	ptr->off_15_0 = offset & 0xFFFF;
 	ptr->cs = selector;
@@ -77,7 +77,7 @@ static void set_intr(struct gatedesc *ptr, uint32_t selector, uint32_t offset, u
 	ptr->off_31_16 = (offset >> 16) & 0xFFFF;
 }
 
-/* Setup a trap gate for cpu exception. */
+/* Setup a trap gate for cpu exception. */ // i386 specific
 static void set_trap(struct gatedesc *ptr, uint32_t selector, uint32_t offset, uint32_t dpl) {
 	ptr->off_15_0 = offset & 0xFFFF;
 	ptr->cs = selector;
@@ -89,6 +89,8 @@ static void set_trap(struct gatedesc *ptr, uint32_t selector, uint32_t offset, u
 	ptr->off_31_16 = (offset >> 16) & 0xFFFF;
 }
 
+
+// belows are defined in do_irq.S and are obviously i386 specific
 void irq0();
 void irq1();
 void irq14();
@@ -150,18 +152,17 @@ void irq_handle(struct TrapFrame *tf) {
 		/* "irq_empty" pushed -1 in the trapframe*/
 		panic("Unhandled exception!");
 	} else if (irq == 0x80) {
-		handle_syscall(irq, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp); //i386 specific
+		handle_syscall(tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp); // i386 specific
 	} else{
 		handle_interrupt(irq);
 	}
 }
 
 
-void trap_init(void){
+void trap_init(void){ // i386 specific
 
 	// interrupt table preparation
 	idt_init();
-
 	// LAPIC & IOAPAC
 	
 	// forbid the outside interruptions
