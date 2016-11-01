@@ -36,6 +36,7 @@ extern uint32_t _end;
 void early_mm_init(void){
 	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)0, (uint32_t)&_end - KERN_BASE);
 	page_index_early_map((pgindex_t*)V2P(entrypgdir), KERN_START, P2V(KERN_START), (uint32_t)&_end - KERN_BASE);
+	page_index_early_map((pgindex_t*)V2P(entrypgdir), DEVSPACE, (void*)DEVSPACE, 0x01000000);
 }
 
 /* Map virtual address starting at @vaddr to physical pages at @paddr, with
