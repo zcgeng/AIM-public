@@ -112,8 +112,7 @@ void irq_handle(struct TrapFrame *tf) {
 		/* "irq_empty" pushed -1 in the trapframe*/
 		panic("Unhandled exception!");
 	} else if (irq == 0x80) {
-		long value = handle_syscall(tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp); // i386 specific
-		trap_return(value, tf);
+		tf->eax = handle_syscall(tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp); // i386 specific
 	} else{
 		handle_interrupt(irq);
 	}
@@ -140,8 +139,4 @@ void i8259_init(void) {
 	outb(PORT_PIC_MASTER, 0x0A);
 	outb(PORT_PIC_SLAVE, 0x68);
 	outb(PORT_PIC_SLAVE, 0x0A);
-}
-
-void trap_return(long value, struct TrapFrame *tf){
-	tf->eax = value;
 }

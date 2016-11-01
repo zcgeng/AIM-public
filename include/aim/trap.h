@@ -22,8 +22,8 @@
 struct TrapFrame;
 
 void trap_init(void);
-
-void trap_return(long value, struct TrapFrame *tf);
+__noreturn
+void trap_return(struct TrapFrame *tf);
 
 long handle_syscall(long number, ...);
 void handle_interrupt(int irq);
