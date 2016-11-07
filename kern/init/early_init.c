@@ -78,6 +78,8 @@ panic:
 void lapicinit();
 void picinit();
 void ioapicinit();
+extern uint32_t early_init_start;
+extern uint32_t early_init_end;
 void high_address_entry(){
 	
 	struct page_allocator a = {
@@ -98,5 +100,7 @@ void high_address_entry(){
 	ioapicinit();    // another interrupt controller
 	trap_init();
 	asm("mov $1, %eax; int $0x80;");
+	kpdebug("early_init_start = 0x%x\n", &early_init_start);
+	kpdebug("early_init_end = 0x%x\n", &early_init_end);
 	panic("succeed !");
 }
