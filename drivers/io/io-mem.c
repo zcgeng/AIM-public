@@ -33,8 +33,11 @@
 #include <aim/gfp.h>
 #include <aim/io.h>
 #include <aim/mmu.h>
+#include <aim/vmm.h>
 #include <aim/panic.h>
 #include <errno.h>
+#include <aim/initcalls.h>
+#include <aim/device.h>
 
 #include <io-mem.h>
 
