@@ -22,6 +22,7 @@
 
 #define __LDSCRIPT__
 #include <aim/memlayout.h>
+#include <asm-generic/vmaim.lds.h>
 /*
  * Using the C preprocessor, we allow includes and macro expansion in this
  * linker script.
@@ -31,24 +32,30 @@ ENTRY(_start)
 SECTIONS
 {
 	. = KERN_LINK; /* high address as 运行地址 */
-        .text : AT(KERN_START) /* physical address as 存储地址 */
-        {
-          	*(.text);
-        }
-        .data :
+	.text : AT(KERN_START) /* physical address as 存储地址 */
 	{
-		*(.data);
+		TEXT;
+	}
+	.data :
+	{
+		DATA(8);
 		
 	}                                    
-        .bss :
-        {
+	.bss :
+	{
 		PROVIDE(_bss_start = .);
-		*(.bss);
+		BSS(8);
 		. = ALIGN(4096);
 		PROVIDE(kstack = .);
 		. += KSTACKSIZE;
 		PROVIDE(kstack_top = .);
 		PROVIDE(_bss_end = .);
-	}           
-        _end = .;
+	}
+	.initcalls :
+	{
+		EARLY_INIT(8);
+		NORM_INIT(8);
+		LATE_INIT(8);
+	}
+	_end = .;
 }
