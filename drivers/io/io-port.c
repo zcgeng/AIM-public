@@ -30,12 +30,15 @@
 #include <errno.h>
 
 #include <io-port.h>
-
+#include <aim/initcalls.h>
+#include <aim/console.h>
+#include <aim/vmm.h>
+#include <lib/libc/string.h>
 #ifdef IO_PORT_ROOT
 #include <asm.h>
 #endif /* IO_PORT_ROOT */
 /*#include <sys/param.h>
-#include <aim/initcalls.h>
+
 #include <util.h>
 #include <asm-generic/funcs.h>*/
 
@@ -245,7 +248,6 @@ int io_port_init(struct bus_device *port_bus)
 #ifndef RAW
 
 #define DEVICE_MODEL	"io-port"
-#if 0
 static struct bus_driver drv;
 
 static int __new(struct devtree_entry *entry)
@@ -284,6 +286,4 @@ static int __driver_init(void)
 	return 0;
 }
 INITCALL_DRIVER(__driver_init);
-#endif /* 0 */
 #endif /* !RAW */
-
