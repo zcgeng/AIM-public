@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <aim/device.h>
+#include <aim/panic.h>
 
 #include <libc/string.h>
 
@@ -58,7 +59,7 @@ void initdev(struct device *dev, int class, const char *devname, dev_t devno,str
 }
 
 void register_driver(unsigned int major, struct driver *drv){
-	
+	panic("implement me!\n");
 }
 
 void set_device_index(struct device_index *index)
