@@ -34,6 +34,7 @@
 #include <platform.h>
 #include <aim/trap.h>
 #include <aim/initcalls.h>
+#include <asm.h>
 
 static inline
 int early_devices_init(void)
@@ -51,10 +52,20 @@ int early_devices_init(void)
 }
 
 void arch_early_init();
-void test();
+extern uint32_t _bss_start;
+extern uint32_t _bss_end;
+
+static void clear_bss(){
+	void* start = (void*)&_bss_start;
+	void* end = (void*)&_bss_end;
+	int count = ((uint32_t)end - (uint32_t)start) / 4;
+	stosb(start , 0, count);
+}
+
 __noreturn
 void master_early_init(void)
 {
+	clear_bss();
 	/* clear address-space-related callback handlers */
 	early_mapping_clear();
 	mmu_handlers_clear();

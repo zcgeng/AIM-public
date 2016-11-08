@@ -69,10 +69,9 @@ void arch_early_init(void)
 	asm(
 		"mov	%0, %%esp;"
 		"mov	%%esp, %%ebp"
-		::"r"(V2P(&kstack_top))
+		::"r"(&kstack_top)
 	);
-	
+
 	/* jump to some high address! */
 	abs_jump(high_address_entry);
 }
-

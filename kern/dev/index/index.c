@@ -72,15 +72,16 @@ int do_early_initcalls(){
 }
 
 int do_initcalls(){
-	uint32_t start = (uint32_t)&norm_init_start;
-	uint32_t end = (uint32_t)&norm_init_end;
-	uint32_t i;
-	for(i = start; i < end; i += 4){
-		kpdebug("start doing norm init calls at 0x%8x\n", i);
-		initcall_t fp = (initcall_t)i;
-		if(fp() != 0){
-			return EOF;
-		}
+	uint32_t *start = &norm_init_start;
+	uint32_t *end = &norm_init_end;
+	uint32_t *i;
+	for(i = start; i < end; i ++){
+		kpdebug("start doing norm init calls at 0x%8x\n", (uint32_t)i);
+		initcall_t fp = (initcall_t)(*i);
+		kpdebug("function address: 0x%8x\n", (uint32_t) fp);
+		// if(fp() != 0){
+		// 	return EOF;
+		// }
 	}
 	return 0;
 }
