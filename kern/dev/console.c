@@ -146,4 +146,3 @@ int early_console_init(struct bus_device *bus, addr_t base, int type)
 	/* really init console */
 	return __early_console_init(bus, base, mapped_base);
 }
-
