@@ -33,6 +33,7 @@
 #include <drivers/io/io-port.h>
 #include <platform.h>
 #include <aim/trap.h>
+#include <aim/initcalls.h>
 
 static inline
 int early_devices_init(void)
@@ -69,6 +70,7 @@ void master_early_init(void)
 	) < 0)
 		panic("Early console init failed.\n");
 	kputs("Hello, world!\n");
+	do_early_initcalls();
 	arch_early_init();
 
 panic:

@@ -27,6 +27,8 @@
 #include <sys/types.h>
 #include <aim/device.h>
 #include <aim/panic.h>
+#include <aim/console.h>
+#include <aim/initcalls.h>
 
 #include <libc/string.h>
 
@@ -50,6 +52,20 @@ static struct device_index __index = {
 	.from_id	= __from_id,
 	.from_name	= __from_name
 };
+
+int do_early_initcalls(){
+	extern uint32_t early_init_start;
+	extern uint32_t early_init_end;
+	uint32_t i = early_init_start;
+	for(i = early_init_start; i < early_init_end; i += 4){
+		kpdebug("start doing early init calls at 0x%8x\n", i);
+		initcall_t fp = (initcall_t)i;
+		if(fp() != 0){
+			return EOF;
+		}
+	}
+	return 0;
+}
 
 void initdev(struct device *dev, int class, const char *devname, dev_t devno,struct driver *drv){
 	dev->class = class;
