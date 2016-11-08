@@ -113,9 +113,10 @@ addr_t page_get_free(void){
 	return area.page_num << 12;
 }
 
-extern uint32_t _end;
-int page_allocator_init(void){
-	// get memory infomation saved by boot loader
+addr_t mem_phybase = 0;
+addr_t mem_size = 0;
+void get_mem_init(){
+  // get memory infomation saved by boot loader
 	PMB* pmb = (PMB*)0x9004;
 	int num = *(int *)0x9000;
 	int i, largest = 0;
@@ -132,8 +133,25 @@ int page_allocator_init(void){
 			largest = i;
 		}
 	}
-	area.base_addr = PGROUNDUP(pmb[largest].BaseAddrLow);
-	area.page_num = pmb[largest].LengthLow / 4096;
+  mem_phybase = pmb[largest].BaseAddrLow;
+  mem_size = pmb[largest].LengthLow;
+}
+
+addr_t get_mem_physbase(){
+  if(mem_phybase == 0) get_mem_init();
+  return mem_phybase;
+}
+
+addr_t get_mem_size(){
+  if(mem_size == 0) get_mem_init();
+  return mem_size;
+}
+
+extern uint32_t _end;
+int page_allocator_init(void){
+  get_mem_init();
+	area.base_addr = get_mem_physbase();
+	area.page_num = get_mem_size() / 4096;
 	uint32_t end = premap_addr((uint32_t)&_end);
 	if(area.base_addr < end){
 		area.base_addr = PGROUNDUP(end);
@@ -182,7 +200,7 @@ _mark_parent(struct buddy* self, int index) {
 }
 
 int buddy_alloc(struct buddy* self, int s) {
-	kprintf("buddy_alloc: s=%d\n", s);
+	//kprintf("buddy_alloc: s=%d\n", s);
 	int size;
 	if (s==0) {
 		size = 1;

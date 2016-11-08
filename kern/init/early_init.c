@@ -109,6 +109,13 @@ void allocator_init(){
 void test_syscall(){
 	asm("mov $1, %eax; int $0x80;");
 }
+void test_alloc(){
+	int i;
+	for(i = 0; i < 1000; ++i){
+		uint32_t x = (uint32_t)kmalloc(1024, 0);
+		kprintf("0x%x\n", x);
+	}
+}
 
 extern void lapicinit();
 extern void picinit();
@@ -121,6 +128,7 @@ void high_address_entry(){
 	ioapicinit();    // another interrupt controller
 	trap_init();
 	test_syscall();
+	//test_alloc();
 	do_initcalls();
 	panic("succeed !");
 }
