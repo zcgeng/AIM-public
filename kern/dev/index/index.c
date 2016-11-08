@@ -50,6 +50,17 @@ static struct device_index __index = {
 	.from_name	= __from_name
 };
 
+void initdev(struct device *dev, int class, const char *devname, dev_t devno,struct driver *drv){
+	dev->class = class;
+	memcpy(dev->name, devname, DEV_NAME_MAX);
+	dev->devno = devno;
+	dev->driver = *drv;
+}
+
+void register_driver(unsigned int major, struct driver *drv){
+	
+}
+
 void set_device_index(struct device_index *index)
 {
 	memcpy(&__index, index, sizeof(*index));
@@ -79,4 +90,3 @@ struct device *dev_from_name(char *name)
 {
 	return __index.from_name(name);
 }
-

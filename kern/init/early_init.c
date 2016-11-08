@@ -61,7 +61,7 @@ void master_early_init(void)
 	if (early_devices_init() < 0)
 		goto panic;
 	/* other preperations, including early secondary buses */
-	
+
 	if (early_console_init(
 		EARLY_CONSOLE_BUS,
 		EARLY_CONSOLE_BASE,
@@ -81,7 +81,7 @@ void ioapicinit();
 extern uint32_t early_init_start;
 extern uint32_t early_init_end;
 void high_address_entry(){
-	
+
 	struct page_allocator a = {
 		page_alloc, page_free, page_get_free
 	};

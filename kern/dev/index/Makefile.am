@@ -27,4 +27,3 @@ devlist_ko_LDFLAGS = $(AM_LDFLAGS) -Wl,-r
 endif
 
 libindex_la_SOURCES = index.c
-
