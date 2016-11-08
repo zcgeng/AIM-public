@@ -27,6 +27,7 @@
 #include <aim/pmm.h>
 #include <libc/string.h>
 #include <util.h>
+#include <aim/console.h>
 
 /* dummy implementations */
 static int __alloc(struct pages *pages) { return EOF; }
@@ -61,6 +62,7 @@ int alloc_pages(struct pages *pages)
 	if (pages->flags & GFP_ZERO)
 		pmemset(pages->paddr, 0, pages->size);
 	//recursive_unlock_irq_restore(&memlock, flags);
+	//kprintf("alloc_pages return address: 0x%x\n", (uint32_t)pages->paddr);
 	return result;
 }
 
@@ -105,4 +107,3 @@ addr_t get_free_memory(void)
 {
 	return __allocator.get_free();
 }
-

@@ -46,7 +46,7 @@ struct Area{
 struct Area area;
 
 #define NODE_UNUSED 0
-#define NODE_USED 1	
+#define NODE_USED 1
 #define NODE_SPLIT 2
 #define NODE_FULL 3
 
@@ -82,7 +82,7 @@ int buddy_alloc(struct buddy* self, int s);
 int buddy_size(struct buddy * self, int offset);
 
 int page_alloc(struct pages *pages){
-	kprintf("page_alloc: pages->size=%d\n", pages->size);
+	//kprintf("page_alloc: pages->size=%d\n", pages->size);
 	int i, offset = -1;
 	int s = (pages->size + PGSIZE - 1) >> 12;
 	for(i = 0; i < area.buddy_num; ++i){
@@ -92,9 +92,10 @@ int page_alloc(struct pages *pages){
 	if(offset == -1){
 		if(area.buddy_num >= area.page_num / 1024) return EOF;
 		buddy_init(area.buddylist[area.buddy_num++], 10);
-		offset = buddy_alloc(area.buddylist[i], s); 
+		offset = buddy_alloc(area.buddylist[i], s);
 	}
 	if(offset == -2 || offset == -1) return EOF;
+  //kprintf("base_addr=0x%x, i=%d, offset=0x%x\n",area.base_addr,  i, offset);
 	pages->paddr = area.base_addr + (i << 22) + (offset << 12); // each buddy has 4MB size and each offset is 4KB
 	area.page_num -= s;
 	return 0;
@@ -104,7 +105,7 @@ void page_free(struct pages *pages) {
 	int buddyN = (pages->paddr - area.base_addr) >> 22;
 	int offset = ((pages->paddr - area.base_addr) >> 12) % 1024;
 	pages->size = buddy_size(area.buddylist[buddyN], offset) << 12;
-	if(pages->size > 0) 
+	if(pages->size > 0)
 		area.page_num += pages->size;
 }
 
@@ -122,7 +123,7 @@ int page_allocator_init(void){
 	kprintf("physical memory areas:\n");
 	kprintf("BaseAddr\tLength\t\tType(1-usable by OS, 2-reserved address)\n");
 	for(i = 0; i < num; ++i){
-        kprintf("0x%8x\t0x%8x\t0x%x\n", 
+        kprintf("0x%8x\t0x%8x\t0x%x\n",
                 pmb[i].BaseAddrLow,
                 pmb[i].LengthLow,
                 pmb[i].Type);
@@ -136,7 +137,7 @@ int page_allocator_init(void){
 	uint32_t end = premap_addr((uint32_t)&_end);
 	if(area.base_addr < end){
 		area.base_addr = PGROUNDUP(end);
-		area.page_num -= (area.base_addr - end) / 4096; 
+		area.page_num -= (area.base_addr - end) / 4096;
 	}
 	area.buddylist = (struct buddy**)kmalloc(sizeof(void *) * (area.page_num / 1024), 0);
 	area.buddy_num = 0;
@@ -166,7 +167,7 @@ get_buddy_index(int index){
 	return index - 1 + (index & 1) * 2;
 }
 
-static void 
+static void
 _mark_parent(struct buddy* self, int index) {
 	for (;;) {
 		int buddy = get_buddy_index(index);
@@ -247,7 +248,7 @@ int buddy_alloc(struct buddy* self, int s) {
 	return -1;
 }
 
-static void 
+static void
 _combine(struct buddy* self, int index) {
 	for (;;) {
 		int buddy = index - 1 + (index & 1) * 2;

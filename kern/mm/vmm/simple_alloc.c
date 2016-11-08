@@ -39,18 +39,18 @@ giving up. Normally this shouldn't happen at all. */
 #define MF_FREE 0x0055ffaa
 
 
-/* 
+/*
 * Much care has gone into making these routines in this file reentrant.
 *
 * The fancy bookkeeping of nbytesmalloced and the like are only used to
-* report them to the user (oooohhhhh, aaaaahhhhh....) are not 
+* report them to the user (oooohhhhh, aaaaahhhhh....) are not
 * protected by cli(). (If that goes wrong. So what?)
 *
 * These routines restore the interrupt status to allow calling with ints
-* off. 
+* off.
 */
 
-/* 
+/*
 * A block header. This is in front of every malloc-block, whether free or not.
 */
 struct block_header {
@@ -67,8 +67,8 @@ struct block_header {
 #define BH(p) ((struct block_header *)(p))
 
 
-/* 
-* The page descriptor is at the front of every page that malloc has in use. 
+/*
+* The page descriptor is at the front of every page that malloc has in use.
 */
 struct page_descriptor {
     struct page_descriptor *next;
@@ -97,7 +97,7 @@ struct size_descriptor {
 };
 
 
-struct size_descriptor sizes[] = { 
+struct size_descriptor sizes[] = {
     { NULL,  32,127, 0,0,0,0 },
     { NULL,  64, 63, 0,0,0,0 },
     { NULL, 128, 31, 0,0,0,0 },
@@ -120,17 +120,17 @@ int simple_allocator_bootstrap(void *pt, size_t size)
     int order;
 	is_page_alloc_on = 0;
 	tmp_mem_pt = pt;
-    /* 
+    /*
     * Check the static info array. Things will blow up terribly if it's
     * incorrect. This is a late "compile time" check.....
     */
     for (order = 0;BLOCKSIZE(order);order++)
     {
         if ((NBLOCKS (order)*BLOCKSIZE(order) + sizeof (struct page_descriptor)) >
-            PAGE_SIZE) 
+            PAGE_SIZE)
         {
             kprintf ("Cannot use %d bytes out of %d in order = %d block mallocs\n",
-                     NBLOCKS (order) * BLOCKSIZE(order) + 
+                     NBLOCKS (order) * BLOCKSIZE(order) +
                      sizeof (struct page_descriptor),
                      (int) PAGE_SIZE,
                      BLOCKSIZE (order));
@@ -151,21 +151,21 @@ int get_order (int size)
     int order;
 
     /* Add the size of the header */
-    size += sizeof (struct block_header); 
+    size += sizeof (struct block_header);
     for (order = 0;BLOCKSIZE(order);order++)
     if (size <= BLOCKSIZE (order))
-    return order; 
+    return order;
     return -1;
 }
 
 void * simple_alloc(size_t size, gfp_t priority)
 {
-	kprintf("simple_alloc: size=%d\n", size);
+  //kprintf("simple_alloc: size=%d\n", size);
     int order,tries,i,sz;
     struct block_header *p;
     struct page_descriptor *page;
 
-    if (size > MAX_KMALLOC_K * 1024) 
+    if (size > MAX_KMALLOC_K * 1024)
     {
         kprintf ("kmalloc: I refuse to allocate %d bytes (for now max = %d).\n",
                  size,MAX_KMALLOC_K*1024);
@@ -179,7 +179,7 @@ void * simple_alloc(size_t size, gfp_t priority)
         return (NULL);
     }
 
-    tries = MAX_GET_FREE_PAGE_TRIES; 
+    tries = MAX_GET_FREE_PAGE_TRIES;
     while (tries --)
     {
         /* Try to allocate a "recently" freed memory block */
@@ -215,7 +215,7 @@ void * simple_alloc(size_t size, gfp_t priority)
 		page = (struct page_descriptor *)tmp_mem_pt;
 	else
         	page = (struct page_descriptor *) (uint32_t)pgalloc();
-        if (!page) 
+        if (!page)
         {
             kprintf ("Couldn't get a free page.....\n");
             return NULL;
@@ -224,7 +224,7 @@ void * simple_alloc(size_t size, gfp_t priority)
         sizes[order].npages++;
 
         /* Loop for all but last block: */
-        for (i=NBLOCKS(order),p=BH (page+1);i > 1;i--,p=p->bh_next) 
+        for (i=NBLOCKS(order),p=BH (page+1);i > 1;i--,p=p->bh_next)
         {
             p->bh_flags = MF_FREE;
             p->bh_next = BH ( ((long)p)+sz);
@@ -234,7 +234,7 @@ void * simple_alloc(size_t size, gfp_t priority)
         p->bh_next = NULL;
 
     page->order = order;
-    page->nfree = NBLOCKS(order); 
+    page->nfree = NBLOCKS(order);
     page->firstfree = BH(page+1);
 
     /* Now we're going to muck with the "global" freelist for this size:
@@ -257,7 +257,7 @@ void simple_free(void *ptr)
 
     page = PAGE_DESC (p);
     order = page->order;
-    if ((order < 0) || 
+    if ((order < 0) ||
         (order > sizeof (sizes)/sizeof (sizes[0])) ||
         (((long)(page->next)) & ~PAGE_MASK) ||
         (p->bh_flags != MF_USED))
@@ -321,4 +321,3 @@ size_t simple_size(void *obj){
 	struct block_header* tmp = (struct block_header*) obj;
 	return tmp->vp.ubh_length;
 }
-

@@ -88,17 +88,9 @@ panic:
 	panic("panic in early_init.c !");
 }
 
-void lapicinit();
-void picinit();
-void ioapicinit();
-extern uint32_t early_init_start;
-extern uint32_t early_init_end;
-extern uint32_t norm_init_start;
-extern uint32_t norm_init_end;
-extern uint32_t late_init_start;
-extern uint32_t late_init_end;
-void high_address_entry(){
 
+
+void allocator_init(){
 	struct page_allocator a = {
 		page_alloc, page_free, page_get_free
 	};
@@ -112,17 +104,23 @@ void high_address_entry(){
 	page_allocator_init();
 	simple_allocator_init();
 	page_allocator_move();
+}
+
+void test_syscall(){
+	asm("mov $1, %eax; int $0x80;");
+}
+
+extern void lapicinit();
+extern void picinit();
+extern void ioapicinit();
+
+void high_address_entry(){
+	allocator_init();
 	lapicinit();     // interrupt controller
 	picinit();       // another interrupt controller
 	ioapicinit();    // another interrupt controller
 	trap_init();
-	asm("mov $1, %eax; int $0x80;");
-	kpdebug("early_init_start = 0x%x\n", &early_init_start);
-	kpdebug("early_init_end = 0x%x\n", &early_init_end);
-	kpdebug("norm_init_start = 0x%x\n", &norm_init_start);
-	kpdebug("norm_init_end = 0x%x\n", &norm_init_end);
-	kpdebug("late_init_start = 0x%x\n", &late_init_start);
-	kpdebug("late_init_end = 0x%x\n", &late_init_end);
+	test_syscall();
 	do_initcalls();
 	panic("succeed !");
 }
