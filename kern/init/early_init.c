@@ -80,6 +80,10 @@ void picinit();
 void ioapicinit();
 extern uint32_t early_init_start;
 extern uint32_t early_init_end;
+extern uint32_t norm_init_start;
+extern uint32_t norm_init_end;
+extern uint32_t late_init_start;
+extern uint32_t late_init_end;
 void high_address_entry(){
 
 	struct page_allocator a = {
@@ -102,5 +106,9 @@ void high_address_entry(){
 	asm("mov $1, %eax; int $0x80;");
 	kpdebug("early_init_start = 0x%x\n", &early_init_start);
 	kpdebug("early_init_end = 0x%x\n", &early_init_end);
+	kpdebug("norm_init_start = 0x%x\n", &norm_init_start);
+	kpdebug("norm_init_end = 0x%x\n", &norm_init_end);
+	kpdebug("late_init_start = 0x%x\n", &late_init_start);
+	kpdebug("late_init_end = 0x%x\n", &late_init_end);
 	panic("succeed !");
 }

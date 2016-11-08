@@ -39,8 +39,8 @@ SECTIONS
 	.data :
 	{
 		DATA(8);
-		
-	}                                    
+
+	}
 	.bss :
 	{
 		PROVIDE(_bss_start = .);
@@ -53,7 +53,6 @@ SECTIONS
 	}
 	.initcalls :
 	{
-		. += 4;
 		EARLY_INIT(8);
 		NORM_INIT(8);
 		LATE_INIT(8);
