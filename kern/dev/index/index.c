@@ -79,9 +79,9 @@ int do_initcalls(){
 		kpdebug("start doing norm init calls at 0x%8x\n", (uint32_t)i);
 		initcall_t fp = (initcall_t)(*i);
 		kpdebug("function address: 0x%8x\n", (uint32_t) fp);
-		// if(fp() != 0){
-		// 	return EOF;
-		// }
+		if(fp() != 0){
+			return EOF;
+		}
 	}
 	return 0;
 }
@@ -94,7 +94,7 @@ void initdev(struct device *dev, int class, const char *devname, dev_t devno,str
 }
 
 void register_driver(unsigned int major, struct driver *drv){
-	panic("implement me!\n");
+	kpdebug("implement me!\n");
 }
 
 void set_device_index(struct device_index *index)
