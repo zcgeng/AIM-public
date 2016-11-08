@@ -52,10 +52,12 @@ static struct device_index __index = {
 	.from_id	= __from_id,
 	.from_name	= __from_name
 };
+extern uint32_t early_init_start;
+extern uint32_t early_init_end;
+extern uint32_t norm_init_start;
+extern uint32_t norm_init_end;
 
 int do_early_initcalls(){
-	extern uint32_t early_init_start;
-	extern uint32_t early_init_end;
 	uint32_t start = (uint32_t)&early_init_start;
 	uint32_t end = (uint32_t)&early_init_end;
 	uint32_t i;
@@ -68,6 +70,21 @@ int do_early_initcalls(){
 	}
 	return 0;
 }
+
+int do_initcalls(){
+	uint32_t start = (uint32_t)&norm_init_start;
+	uint32_t end = (uint32_t)&norm_init_end;
+	uint32_t i;
+	for(i = start; i < end; i += 4){
+		kpdebug("start doing norm init calls at 0x%8x\n", i);
+		initcall_t fp = (initcall_t)i;
+		if(fp() != 0){
+			return EOF;
+		}
+	}
+	return 0;
+}
+
 void initdev(struct device *dev, int class, const char *devname, dev_t devno,struct driver *drv){
 	dev->class = class;
 	memcpy(dev->name, devname, DEV_NAME_MAX);
