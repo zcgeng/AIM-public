@@ -26,6 +26,9 @@
 #include <aim/device.h>
 #include <aim/mmu.h>
 #include <aim/initcalls.h>
+#include <errno.h>
+#include <aim/vmm.h>
+#include <sys/param.h>
 
 #include <uart-ns16550-hw.h>
 
@@ -197,32 +200,24 @@ int __early_console_init(struct bus_device *bus, addr_t base, addr_t mapped_base
 #define DEVICE_MODEL	"uart-ns16550"
 static struct chr_driver drv;
 
-static int __new(struct devtree_entry *entry)
-{
-	/* default implementation... */
-	return -EEXIST;
-}
-
 static struct chr_driver drv = {
 	.class = DEVCLASS_CHR,
-	.read = 
-	.write =
-	.getc = __uart_ns16550_getchar,
-	.putc = __uart_ns16550_putchar,
-	.new = __new,
+	.read = NULL,
+	.write = NULL,
+	.getc = NULL,
+	.putc = NULL
 };
 
 static int __driver_init(void)
 {
 	struct chr_device *memory_bus;
 	register_driver(NOMAJOR, &drv);
-#ifdef IO_MEM_ROOT
 	memory_bus = kmalloc(sizeof(*memory_bus), GFP_ZERO);
 	initdev(memory_bus, DEVCLASS_CHR, "uart-ns16550", NODEV, &drv);
 	dev_add(memory_bus);
-#endif
 	return 0;
 }
+
 INITCALL_DRIVER(__driver_init);
 
 #endif /* RAW */

@@ -37,7 +37,6 @@
 #include <aim/panic.h>
 #include <errno.h>
 #include <aim/initcalls.h>
-#include <aim/device.h>
 
 #include <io-mem.h>
 
@@ -160,4 +159,3 @@ static int __driver_init(void)
 }
 INITCALL_DRIVER(__driver_init);
 #endif /* !RAW */
-
