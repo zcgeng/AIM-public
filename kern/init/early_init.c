@@ -112,5 +112,6 @@ void high_address_entry(){
 	kpdebug("norm_init_end = 0x%x\n", &norm_init_end);
 	kpdebug("late_init_start = 0x%x\n", &late_init_start);
 	kpdebug("late_init_end = 0x%x\n", &late_init_end);
+	do_initcalls();
 	panic("succeed !");
 }
