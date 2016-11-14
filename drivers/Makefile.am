@@ -20,7 +20,8 @@ include $(top_srcdir)/env.am
 
 SUBDIRS = \
 	io \
-	serial
+	serial \
+	common
 
 noinst_LTLIBRARIES = libdrivers-raw.la libdrivers.la
 
@@ -38,4 +39,3 @@ libdrivers_la_LIBADD = \
 	common/libcommon.la \
 	io/libio.la \
 	serial/libserial.la
-
