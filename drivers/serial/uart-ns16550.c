@@ -28,6 +28,7 @@
 #include <aim/initcalls.h>
 #include <errno.h>
 #include <aim/vmm.h>
+#include <aim/debug.h>
 #include <sys/param.h>
 
 #include <uart-ns16550-hw.h>
@@ -198,26 +199,55 @@ int __early_console_init(struct bus_device *bus, addr_t base, addr_t mapped_base
 #else /* not RAW, or kernel driver */
 
 #define DEVICE_MODEL	"uart-ns16550"
-static struct chr_driver drv;
+
+static int __dirver_getchar(dev_t dev){
+	struct device *tmp = dev_from_id(dev);
+	assert(tmp != NULL);
+	return (int)__uart_ns16550_getchar((struct chr_device *)tmp);
+}
+
+static int __driver_putchar(dev_t dev, int c){
+	struct device *tmp = dev_from_id(dev);
+	assert(tmp != NULL);
+	return __uart_ns16550_putchar((struct chr_device *)tmp, (unsigned char)c);
+}
+
+// static int console_putchar(int c){
+// 	struct chr_device * tmp = (struct chr_device *)dev_from_name("uart-ns16550");
+// 	return __uart_ns16550_putchar(tmp, c);
+// }
+
+// static int __driver_read(dev_t dev, struct uio *uio, int ioflags){
+// 	return 0;
+// }
+//
+// static int __driver_write(dev_t dev, struct uio *uio, int ioflags){
+// 	return 0;
+// }
 
 static struct chr_driver drv = {
 	.class = DEVCLASS_CHR,
-	.read = NULL,
-	.write = NULL,
-	.getc = NULL,
-	.putc = NULL
+	// .read = __driver_read,
+	// .write = __driver_write,
+	.getc = __dirver_getchar,
+	.putc = __driver_putchar
 };
 
 static int __driver_init(void)
 {
-	struct chr_device *memory_bus;
+	struct chr_device *uart;
 	register_driver(NOMAJOR, &drv);
-	memory_bus = kmalloc(sizeof(*memory_bus), GFP_ZERO);
-	initdev(memory_bus, DEVCLASS_CHR, "uart-ns16550", NODEV, &drv);
-	dev_add(memory_bus);
+	uart = (struct chr_device *)kmalloc(sizeof(*uart), GFP_ZERO);
+	uart->bus = ((struct bus_device *)dev_from_name("memory")) -> bus;
+	uart->base = UART_BASE;
+	initdev(uart, DEVCLASS_CHR, "uart-ns16550", NODEV, &drv);
+	dev_add(uart);
+	//__uart_ns16550_init(uart);
+	//__uart_ns16550_enable(uart);
+	//set_console(console_putchar, DEFAULT_KPUTS);
 	return 0;
 }
 
-INITCALL_DRIVER(__driver_init);
+INITCALL_DEV(__driver_init);
 
 #endif /* RAW */
