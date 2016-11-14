@@ -212,10 +212,10 @@ static int __driver_putchar(dev_t dev, int c){
 	return __uart_ns16550_putchar((struct chr_device *)tmp, (unsigned char)c);
 }
 
-// static int console_putchar(int c){
-// 	struct chr_device * tmp = (struct chr_device *)dev_from_name("uart-ns16550");
-// 	return __uart_ns16550_putchar(tmp, c);
-// }
+static int console_putchar(int c){
+	struct chr_device * tmp = (struct chr_device *)dev_from_name("uart-ns16550");
+	return __uart_ns16550_putchar(tmp, c);
+}
 
 // static int __driver_read(dev_t dev, struct uio *uio, int ioflags){
 // 	return 0;
@@ -242,9 +242,9 @@ static int __driver_init(void)
 	uart->base = UART_BASE;
 	initdev(uart, DEVCLASS_CHR, "uart-ns16550", NODEV, &drv);
 	dev_add(uart);
-	//__uart_ns16550_init(uart);
-	//__uart_ns16550_enable(uart);
-	//set_console(console_putchar, DEFAULT_KPUTS);
+	__uart_ns16550_init(uart);
+	__uart_ns16550_enable(uart);
+	set_console(console_putchar, DEFAULT_KPUTS);
 	return 0;
 }
 
