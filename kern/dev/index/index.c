@@ -85,17 +85,17 @@ int do_initcalls(){
 	}
 	return 0;
 }
-
-void initdev(struct device *dev, int class, const char *devname, dev_t devno,struct driver *drv){
-	dev->class = class;
-	memcpy(dev->name, devname, DEV_NAME_MAX);
-	dev->devno = devno;
-	dev->driver = *drv;
-}
-
-void register_driver(unsigned int major, struct driver *drv){
-	kpdebug("implement me!\n");
-}
+// 
+// void initdev(struct device *dev, int class, const char *devname, dev_t devno,struct driver *drv){
+// 	dev->class = class;
+// 	memcpy(dev->name, devname, DEV_NAME_MAX);
+// 	dev->devno = devno;
+// 	dev->driver = *drv;
+// }
+//
+// void register_driver(unsigned int major, struct driver *drv){
+// 	kpdebug("implement me!\n");
+// }
 
 void set_device_index(struct device_index *index)
 {
