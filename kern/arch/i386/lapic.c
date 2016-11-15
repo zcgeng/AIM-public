@@ -26,6 +26,7 @@ void            microdelay(int);
 #include "aim/console.h"
 #include "aim/panic.h"
 #include "aim/memlayout.h"
+#include "mp.h"
 
 // Local APIC registers, divided by 4 for use as uint[] indices.
 #define ID      (0x0020/4)   // ID
@@ -59,6 +60,8 @@ void            microdelay(int);
 #define TDCR    (0x03E0/4)   // Timer Divide Configuration
 
 volatile uint *lapic;  // Initialized in mp.c
+extern int ncpu;
+extern struct cpu *cpus;
 
 static void
 lapicw(int index, int value)
@@ -71,8 +74,8 @@ lapicw(int index, int value)
 void
 lapicinit(void)
 {
-  //if(!lapic)
-  //  return;
+  if(!lapic)
+   return;
 
   // Enable local APIC; set spurious interrupt vector.
   lapicw(SVR, ENABLE | (T_IRQ0 + IRQ_SPURIOUS));
@@ -117,8 +120,8 @@ lapicinit(void)
 int
 cpunum(void)
 {
-//  int apicid, i;
-  
+  int apicid, i;
+
   // Cannot call cpu when interrupts are enabled:
   // result not guaranteed to last long enough to be used!
   // Would prefer to panic but even printing is chancy here:
@@ -134,11 +137,11 @@ cpunum(void)
   if (!lapic)
     return 0;
 
-  //apicid = lapic[ID] >> 24;
-  //for (i = 0; i < ncpu; ++i) {
-  //  if (cpus[i].apicid == apicid)
-  //    return i;
-  //}
+  apicid = lapic[ID] >> 24;
+  for (i = 0; i < ncpu; ++i) {
+   if (cpus[i].apicid == apicid)
+     return i;
+  }
 return 0;
   panic("unknown apicid\n");
 }
@@ -208,5 +211,3 @@ lapicstartap(uchar apicid, uint addr)
 #define DAY     0x07
 #define MONTH   0x08
 #define YEAR    0x09
-
-
