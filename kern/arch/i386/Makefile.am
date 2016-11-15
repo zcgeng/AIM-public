@@ -20,7 +20,7 @@ include $(top_srcdir)/env.am
 SUBDIRS = \
 	$(PREFIXED_MACH)
 DIST_SUBDIRS = \
-	mach-pc
+	mach-unknown
 
 dist_noinst_DATA = vmaim.lds.S
 
@@ -41,4 +41,3 @@ libarch_la_SOURCES = \
 	do_irq.S
 libarch_la_LIBADD = \
 	mach-$(MACH)/libmach.la
-
