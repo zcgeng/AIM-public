@@ -222,6 +222,8 @@ static void startothers(void)
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
     //TODO: stack = kalloc();
+		extern ushort gdtdesc_aaaa;
+		*((ushort*)0x6ffe) = V2P(&gdtdesc_aaaa);
     *(void**)(code-4) = stack + KSTACKSIZE;
     *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);

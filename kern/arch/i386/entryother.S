@@ -57,7 +57,7 @@ start_other:
   # Switch from real to protected mode.  Use a bootstrap GDT that makes
   # virtual addresses map directly to physical addresses so that the
   # effective memory map doesn't change during the transition.
-  #lgdt    gdtdesc
+  lgdt    0x6ffe
   movl    %cr0, %eax
   orl     $CR0_PE, %eax
   movl    %eax, %cr0
@@ -110,9 +110,9 @@ gdt:
   SEG_ASM(STA_X|STA_R, 0, 0xffffffff)
   SEG_ASM(STA_W, 0, 0xffffffff)
 
-
-gdtdesc:
-  .word   (gdtdesc - gdt - 1)
+.global gdtdesc_aaaa
+gdtdesc_aaaa:
+  .word   (gdtdesc_aaaa - gdt - 1)
   .long   gdt
 
 .globl _binary_entryother_end
