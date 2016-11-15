@@ -153,8 +153,7 @@ void high_address_entry(){
 int cpunum();
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
-void
-seginit(void)
+void seginit(void)
 {
   struct cpu *c;
 
@@ -175,23 +174,21 @@ seginit(void)
   loadgs(SEG_KCPU << 3);
 
   // Initialize cpu-local storage.
-  cpu = c;
-  proc = 0;
+  //cpu = c;
+  //proc = 0;
 }
 
 // Common CPU setup code.
-static void
-mpmain(void)
+static void mpmain(void)
 {
   kprintf("cpu%d: starting\n", cpunum());
   trap_init();       // load idt register
-  xchg(&cpu->started, 1); // tell startothers() we're up
+  //xchg(&cpu->started, 1); // tell startothers() we're up
   //scheduler();     // start running processes
 }
 
 // Other CPUs jump here from entryother.S.
-static void
-mpenter(void)
+static void mpenter(void)
 {
   //switchkvm();
   seginit();
@@ -204,7 +201,9 @@ void lapicstartap(uchar apicid, uint addr);
 // Start the non-boot (AP) processors.
 static void startothers(void)
 {
-  extern uchar _binary_entryother_start[], _binary_entryother_size[];
+	mpenter();
+  extern uchar _binary_entryother_start[], _binary_entryother_end[];
+	uint _binary_entryother_size = (uint)_binary_entryother_end - (uint)_binary_entryother_start;
   uchar *code;
   struct cpu *c;
   char *stack = NULL;
@@ -213,7 +212,7 @@ static void startothers(void)
   // The linker has placed the image of entryother.S in
   // _binary_entryother_start.
   code = P2V(0x7000);
-  memmove(code, _binary_entryother_start, (uint)_binary_entryother_size);
+  memcpy(code, _binary_entryother_start, (uint)_binary_entryother_size);
 
   for(c = cpus; c < cpus+ncpu; c++){
     if(c == cpus+cpunum())  // We've started already.

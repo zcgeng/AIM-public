@@ -44,8 +44,8 @@
 .globl _binary_entryother_start
 _binary_entryother_start:
 .code16
-.globl start
-start:
+.globl start_other
+start_other:
   cli
 
   # Zero data segment registers DS, ES, and SS.
@@ -84,7 +84,7 @@ start32:
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Use entrypgdir as our initial page table
-  movl    (start-12), %eax
+  movl    (start_other-12), %eax
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax
@@ -92,9 +92,9 @@ start32:
   movl    %eax, %cr0
 
   # Switch to the stack allocated by startothers()
-  movl    (start-4), %esp
+  movl    (start_other-4), %esp
   # Call mpenter()
-  call	 *(start-8)
+  call	 *(start_other-8)
 
   movw    $0x8a00, %ax
   movw    %ax, %dx
