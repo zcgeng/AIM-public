@@ -200,7 +200,7 @@ int __early_console_init(struct bus_device *bus, addr_t base, addr_t mapped_base
 
 #define DEVICE_MODEL	"uart-ns16550"
 
-static int __dirver_getchar(dev_t dev){
+static int __driver_getchar(dev_t dev){
 	struct device *tmp = dev_from_id(dev);
 	assert(tmp != NULL);
 	return (int)__uart_ns16550_getchar((struct chr_device *)tmp);
@@ -230,7 +230,7 @@ static struct chr_driver drv = {
 	.class = DEVCLASS_CHR,
 	// .read = __driver_read,
 	// .write = __driver_write,
-	.getc = __dirver_getchar,
+	.getc = __driver_getchar,
 	.putc = __driver_putchar
 };
 
@@ -238,12 +238,12 @@ static int __driver_init(void)
 {
 	struct chr_device *uart;
 	register_driver(NOMAJOR, &drv);
-	my_device = (struct chr_device *)dev_from_name(DEVICE_MODEL);
 	uart = (struct chr_device *)kmalloc(sizeof(*uart), GFP_ZERO);
-	uart->bus = ((struct bus_device *)dev_from_name("portio")) -> bus;
+	uart->bus = ((struct bus_device *)dev_from_name("portio"));
 	uart->base = UART_BASE;
-	initdev(uart, DEVCLASS_CHR, DEVICE_MODEL, NODEV, &drv);
+	initdev(uart, DEVCLASS_CHR, "uart-ns16550", NODEV, &drv);
 	dev_add(uart);
+	my_device = (struct chr_device *)dev_from_name("uart-ns16550");
 	__uart_ns16550_init(uart);
 	__uart_ns16550_enable(uart);
 	set_console(console_putchar, DEFAULT_KPUTS);
