@@ -184,6 +184,9 @@ static void mpmain(void)
   kprintf("cpu%d: starting\n", cpunum());
   trap_init();       // load idt register
   //xchg(&cpu->started, 1); // tell startothers() we're up
+	//TODO: use the upper line
+	*((uint*)0x7c00) = 1;
+	while(1);
   //scheduler();     // start running processes
 }
 
@@ -223,12 +226,18 @@ static void startothers(void)
     *(void**)(code-4) = stack + 2048;
     *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
-
+		*((uint*)0x7c00) = 0; // TODO: remove this
     lapicstartap(c->apicid, V2P(code));
 
     // wait for cpu to finish mpmain()
-    while(c->started == 0)
-      ;
+    // TODO: while(c->started == 0);
+		int i = 0;
+		while(*((uint*)0x7c00) != 1){
+			if((i++) % 100000 == 0)
+				kprintf("."); // I don't know why but I must do something here or other cpus won't start.
+		}
+		// TODO: I just use a strange memory position to mark one cpu is on.
+		// I need to use struct cpu to check whether it finishes mpmain
   }
 }
 
