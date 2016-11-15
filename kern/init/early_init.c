@@ -220,10 +220,10 @@ static void startothers(void)
     // Tell entryother.S what stack to use, where to enter, and what
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
-    stack = kmalloc(4096, 0);
+    stack = kmalloc(2048, 0);
 		extern ushort gdtdesc_aaaa;
-		*((ushort*)0x6ffe) = V2P(&gdtdesc_aaaa);
-    *(void**)(code-4) = stack + KSTACKSIZE;
+		*((uint*)0x6ff0) = V2P(&gdtdesc_aaaa);
+    *(void**)(code-4) = stack + 2048;
     *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
 

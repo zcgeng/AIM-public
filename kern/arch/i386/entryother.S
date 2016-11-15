@@ -47,7 +47,10 @@ _binary_entryother_start:
 .globl start_other
 start_other:
   cli
-
+  # debug: test whether other cpu is here
+  movb     $38, (0x8000)
+  hlt
+  
   # Zero data segment registers DS, ES, and SS.
   xorw    %ax,%ax
   movw    %ax,%ds
@@ -57,7 +60,7 @@ start_other:
   # Switch from real to protected mode.  Use a bootstrap GDT that makes
   # virtual addresses map directly to physical addresses so that the
   # effective memory map doesn't change during the transition.
-  lgdt    0x6ffe
+  lgdt    0x6ff0
   movl    %cr0, %eax
   orl     $CR0_PE, %eax
   movl    %eax, %cr0
