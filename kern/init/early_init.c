@@ -129,8 +129,8 @@ void high_address_entry(){
 	picinit();       // another interrupt controller
 	ioapicinit();    // another interrupt controller
 	trap_init();
-	test_syscall();
-	//test_alloc();
 	do_initcalls();
+	//test_syscall();
+	//test_alloc();
 	panic("succeed !");
 }
