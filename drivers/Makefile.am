@@ -19,7 +19,6 @@
 include $(top_srcdir)/env.am
 
 SUBDIRS = \
-	common \
 	io \
 	serial \
 	common

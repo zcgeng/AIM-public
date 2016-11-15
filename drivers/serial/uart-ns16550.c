@@ -212,9 +212,10 @@ static int __driver_putchar(dev_t dev, int c){
 	return __uart_ns16550_putchar((struct chr_device *)tmp, (unsigned char)c);
 }
 
+static struct chr_device *my_device = NULL;
 static int console_putchar(int c){
-	struct chr_device * tmp = (struct chr_device *)dev_from_name("uart-ns16550");
-	return __uart_ns16550_putchar(tmp, c);
+	assert(my_device != NULL);
+	return __uart_ns16550_putchar(my_device, c);
 }
 
 // static int __driver_read(dev_t dev, struct uio *uio, int ioflags){
@@ -237,10 +238,11 @@ static int __driver_init(void)
 {
 	struct chr_device *uart;
 	register_driver(NOMAJOR, &drv);
+	my_device = (struct chr_device *)dev_from_name(DEVICE_MODEL);
 	uart = (struct chr_device *)kmalloc(sizeof(*uart), GFP_ZERO);
-	uart->bus = ((struct bus_device *)dev_from_name("memory")) -> bus;
+	uart->bus = ((struct bus_device *)dev_from_name("portio")) -> bus;
 	uart->base = UART_BASE;
-	initdev(uart, DEVCLASS_CHR, "uart-ns16550", NODEV, &drv);
+	initdev(uart, DEVCLASS_CHR, DEVICE_MODEL, NODEV, &drv);
 	dev_add(uart);
 	__uart_ns16550_init(uart);
 	__uart_ns16550_enable(uart);

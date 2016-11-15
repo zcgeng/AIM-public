@@ -25,7 +25,8 @@ SRCS = \
 	memcpy.c \
 	memset.c \
 	snprintf.c \
-	strcmp.c
+	strcmp.c \
+	strlcpy.c
 
 noinst_HEADERS = \
 	stdarg.h \
@@ -40,4 +41,3 @@ libc_nopic_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
 libc_nopic_la_LDFLAGS = $(AM_LDFLAGS_NOPIC)
 
 libc_la_SOURCES = $(SRCS)
-
