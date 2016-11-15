@@ -117,12 +117,14 @@ void test_alloc(){
 	}
 }
 
+extern void mpinit();
 extern void lapicinit();
 extern void picinit();
 extern void ioapicinit();
 
 void high_address_entry(){
 	allocator_init();
+	mpinit();
 	lapicinit();     // interrupt controller
 	picinit();       // another interrupt controller
 	ioapicinit();    // another interrupt controller
