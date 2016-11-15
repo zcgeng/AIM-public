@@ -6,7 +6,8 @@
 #include "arch-trap.h"
 #include "aim/console.h"
 void            ioapicenable(int irq, int cpu);
-//extern uchar    ioapicid;
+extern uchar    ioapicid;
+extern int ismp;
 void            ioapicinit(void);
 
 #define IOAPIC  0xFEC00000   // Default physical address of IO APIC
@@ -51,16 +52,16 @@ ioapicwrite(int reg, uint data)
 void
 ioapicinit(void)
 {
-  int i, /*id,*/ maxintr;
+  int i, id, maxintr;
 
-//  if(!ismp)
-//    return;
+ if(!ismp)
+   return;
 
   ioapic = (volatile struct ioapic*)IOAPIC;
   maxintr = (ioapicread(REG_VER) >> 16) & 0xFF;
-//  id = ioapicread(REG_ID) >> 24;
-//  if(id != ioapicid)
-//    kprintf("ioapicinit: id isn't equal to ioapicid; not a MP\n");
+ id = ioapicread(REG_ID) >> 24;
+ if(id != ioapicid)
+   kprintf("ioapicinit: id isn't equal to ioapicid; not a MP\n");
 
   // Mark all interrupts edge-triggered, active high, disabled,
   // and not routed to any CPUs.
@@ -73,8 +74,8 @@ ioapicinit(void)
 void
 ioapicenable(int irq, int cpunum)
 {
-  //if(!ismp)
-   // return;
+  if(!ismp)
+   return;
 
   // Mark interrupt edge-triggered, active high,
   // enabled, and routed to the given cpunum,
