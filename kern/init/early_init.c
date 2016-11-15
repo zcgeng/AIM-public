@@ -111,9 +111,20 @@ void test_syscall(){
 }
 void test_alloc(){
 	int i;
-	for(i = 0; i < 1000; ++i){
-		uint32_t x = (uint32_t)kmalloc(1024, 0);
-		kprintf("0x%x\n", x);
+	int address[100];
+	int j = 20;
+	while(j--){
+		for(i = 0; i < 100; ++i){
+			uint32_t x = (uint32_t)kmalloc(20, 0);
+			address[i] = x;
+			kprintf("at 0x%x is 0x%x", x, *(int*)x);
+			*(int*)x = j;
+			kprintf(",now is 0x%x\n", *(int*)x);
+		}
+		for(i = 0; i < 100; ++i){
+			kfree((void*)address[i]);
+			kprintf("freed 0x%x\n", address[i]);
+		}
 	}
 }
 

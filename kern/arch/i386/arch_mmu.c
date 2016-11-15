@@ -34,8 +34,8 @@ pgindex_t entrypgdir[NPDENTRIES];
 extern uint32_t _end;
 /* Initialize a page index table and fill in the structure @pgindex */
 void early_mm_init(void){
-	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)0, (uint32_t)&_end - KERN_BASE);
-	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, P2V(0), (uint32_t)&_end - KERN_BASE + KERN_START);
+	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)0, (uint32_t)&_end - KERN_BASE + 0x10000000);
+	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, P2V(0), (uint32_t)&_end - KERN_BASE + KERN_START + 0x10000000);
 	page_index_early_map((pgindex_t*)V2P(entrypgdir), DEVSPACE, (void*)DEVSPACE, 0x01000000);
 }
 
