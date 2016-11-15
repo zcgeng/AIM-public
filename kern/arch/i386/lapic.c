@@ -27,6 +27,7 @@ void            microdelay(int);
 #include "aim/panic.h"
 #include "aim/memlayout.h"
 #include "mp.h"
+#include "proc.h"
 
 // Local APIC registers, divided by 4 for use as uint[] indices.
 #define ID      (0x0020/4)   // ID

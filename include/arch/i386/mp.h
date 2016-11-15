@@ -1,20 +1,5 @@
 // See MultiProcessor Specification Version 1.[14]
 
-#include <arch-mmu.h>
-struct cpu {
-  uchar apicid;                // Local APIC ID
-  struct context *scheduler;   // swtch() here to enter scheduler
-  struct taskstate ts;         // Used by x86 to find stack for interrupt
-  struct segdesc gdt[NSEGS];   // x86 global descriptor table
-  volatile uint started;       // Has the CPU started?
-  int ncli;                    // Depth of pushcli nesting.
-  int intena;                  // Were interrupts enabled before pushcli?
-
-  // Cpu-local storage variables; see below
-  struct cpu *cpu;
-  struct proc *proc;           // The currently-running process.
-};
-
 struct mp {             // floating pointer
   uchar signature[4];           // "_MP_"
   void *physaddr;               // phys addr of MP config table

@@ -5,6 +5,7 @@
 #include "sys/types.h"
 #include "aim/memlayout.h"
 #include "mp.h"
+#include "proc.h"
 #include "asm.h"
 #include "arch-mmu.h"
 #include "libc/string.h"
