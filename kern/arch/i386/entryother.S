@@ -47,10 +47,6 @@ _binary_entryother_start:
 .globl start_other
 start_other:
   cli
-  # debug: test whether other cpu is here
-  movb     $38, (0x8000)
-  hlt
-  
   # Zero data segment registers DS, ES, and SS.
   xorw    %ax,%ax
   movw    %ax,%ds
@@ -60,7 +56,7 @@ start_other:
   # Switch from real to protected mode.  Use a bootstrap GDT that makes
   # virtual addresses map directly to physical addresses so that the
   # effective memory map doesn't change during the transition.
-  lgdt    0x6ff0
+  lgdt    (gdtdesc_other - start_other + 0x7000)
   movl    %cr0, %eax
   orl     $CR0_PE, %eax
   movl    %eax, %cr0
@@ -68,11 +64,15 @@ start_other:
   # Complete the transition to 32-bit protected mode by using a long jmp
   # to reload %cs and %eip.  The segment descriptors are set up with no
   # translation, so that the mapping is still the identity mapping.
-  ljmpl    $(SEG_KCODE<<3), $(start32)
+  ljmpl    $(SEG_KCODE<<3), $0x7000 + start32_other - start_other
 
-//PAGEBREAK!
+
 .code32  # Tell assembler to generate 32-bit code now.
-start32:
+.globl start32_other
+start32_other:
+# debug: test whether other cpu is here
+movb     $38, (0x8000)
+hlt
   # Set up the protected-mode data segment registers
   movw    $(SEG_KDATA<<3), %ax    # Our data segment selector
   movw    %ax, %ds                # -> DS: Data Segment
@@ -108,15 +108,16 @@ spin:
   jmp     spin
 
 .p2align 2
-gdt:
+.global gdt_other
+gdt_other:
   SEG_NULLASM
   SEG_ASM(STA_X|STA_R, 0, 0xffffffff)
   SEG_ASM(STA_W, 0, 0xffffffff)
 
-.global gdtdesc_aaaa
-gdtdesc_aaaa:
-  .word   (gdtdesc_aaaa - gdt - 1)
-  .long   gdt
+.global gdtdesc_other
+gdtdesc_other:
+  .word   (gdtdesc_other - gdt_other - 1)
+  .long   gdt_other - start_other + 0x7000
 
 .globl _binary_entryother_end
 _binary_entryother_end:

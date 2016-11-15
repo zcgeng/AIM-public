@@ -212,7 +212,6 @@ static void startothers(void)
   // _binary_entryother_start.
   code = P2V(0x7000);
   memcpy(code, _binary_entryother_start, (uint)_binary_entryother_size);
-
   for(c = cpus; c < cpus+ncpu; c++){
     if(c == cpus+cpunum())  // We've started already.
       continue;
@@ -221,8 +220,6 @@ static void startothers(void)
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
     stack = kmalloc(2048, 0);
-		extern ushort gdtdesc_aaaa;
-		*((uint*)0x6ff0) = V2P(&gdtdesc_aaaa);
     *(void**)(code-4) = stack + 2048;
     *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
