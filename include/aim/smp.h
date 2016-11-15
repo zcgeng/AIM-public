@@ -23,10 +23,10 @@
 #ifndef __ASSEMBLER__
 
 int nr_cpus(void);
-int cpuid(void);
+int cpuid(void); // TODO
 void smp_startup(void);
 /* Returns 0 when succeed */
-int handle_ipi_interrupt(unsigned int msg);
+int handle_ipi_interrupt(unsigned int msg); // TODO
 
 #endif /* !__ASSEMBLER__ */
 
