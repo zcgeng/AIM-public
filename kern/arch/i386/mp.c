@@ -5,12 +5,11 @@
 #include "sys/types.h"
 #include "aim/memlayout.h"
 #include "mp.h"
-#include "proc.h"
+#include "aim/proc.h"
 #include "asm.h"
 #include "arch-mmu.h"
 #include "libc/string.h"
 
-#define NCPU          8  // maximum number of CPUs
 
 struct cpu cpus[NCPU];
 int ismp;

@@ -27,7 +27,7 @@ void            microdelay(int);
 #include "aim/panic.h"
 #include "aim/memlayout.h"
 #include "mp.h"
-#include "proc.h"
+#include "aim/proc.h"
 
 // Local APIC registers, divided by 4 for use as uint[] indices.
 #define ID      (0x0020/4)   // ID
@@ -62,7 +62,6 @@ void            microdelay(int);
 
 volatile uint *lapic;  // Initialized in mp.c
 extern int ncpu;
-extern struct cpu *cpus;
 
 static void
 lapicw(int index, int value)

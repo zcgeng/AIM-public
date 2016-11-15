@@ -1,5 +1,7 @@
 #include <arch-mmu.h>
 // Per-CPU state
+#define NCPU 8
+#define NOFILE       16  // open files per process
 struct cpu {
   uchar apicid;                // Local APIC ID
   struct context *scheduler;   // swtch() here to enter scheduler

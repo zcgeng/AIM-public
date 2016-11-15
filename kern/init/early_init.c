@@ -35,6 +35,8 @@
 #include <aim/trap.h>
 #include <aim/initcalls.h>
 #include <asm.h>
+#include <aim/proc.h>
+#include <aim/memlayout.h>
 
 static inline
 int early_devices_init(void)
@@ -132,6 +134,7 @@ extern void mpinit();
 extern void lapicinit();
 extern void picinit();
 extern void ioapicinit();
+static void startothers();
 
 void high_address_entry(){
 	allocator_init();
@@ -143,9 +146,11 @@ void high_address_entry(){
 	do_initcalls();
 	//test_syscall();
 	//test_alloc();
+	startothers();
 	panic("succeed !");
 }
 
+int cpunum();
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
 void
@@ -195,15 +200,14 @@ mpenter(void)
 }
 
 pde_t entrypgdir[];  // For entry.S
-
+void lapicstartap(uchar apicid, uint addr);
 // Start the non-boot (AP) processors.
-static void
-startothers(void)
+static void startothers(void)
 {
   extern uchar _binary_entryother_start[], _binary_entryother_size[];
   uchar *code;
   struct cpu *c;
-  char *stack;
+  char *stack = NULL;
 
   // Write entry code to unused memory at 0x7000.
   // The linker has placed the image of entryother.S in
@@ -218,7 +222,7 @@ startothers(void)
     // Tell entryother.S what stack to use, where to enter, and what
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
-    stack = kalloc();
+    //TODO: stack = kalloc();
     *(void**)(code-4) = stack + KSTACKSIZE;
     *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
@@ -241,5 +245,5 @@ pde_t entrypgdir[NPDENTRIES] = {
   // Map VA's [0, 4MB) to PA's [0, 4MB)
   [0] = (0) | PTE_P | PTE_W | PTE_PS,
   // Map VA's [KERNBASE, KERNBASE+4MB) to PA's [0, 4MB)
-  [KERNBASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
+  [KERN_BASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
 };
