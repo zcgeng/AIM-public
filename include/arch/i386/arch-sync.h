@@ -23,6 +23,36 @@
 #include <aim/proc.h>
 #include <asm.h>
 #include <aim/panic.h>
+#include <aim/sync.h>
+
+// Pushcli/popcli are like cli/sti except that they are matched:
+// it takes two popcli to undo two pushcli.  Also, if interrupts
+// are off, then pushcli, popcli leaves them off.
+
+static int ncli = 0;
+static void pushcli(void)
+{
+  //int eflags;
+
+  //eflags = readeflags();
+  cli();
+	ncli++;
+  // if(cpu->ncli == 0)
+  //   cpu->intena = eflags & FL_IF;
+  // cpu->ncli += 1;
+}
+
+static void popcli(void)
+{
+  // if(readeflags()&FL_IF)
+  //   panic("popcli - interruptible");
+  // if(--cpu->ncli < 0)
+  //   panic("popcli");
+  // if(cpu->ncli == 0 && cpu->intena)
+	if(--ncli < 0) panic("ncli < 0!\n");
+  sti();
+}
+
 // Mutual exclusion lock.
 typedef struct spinlock {
   uint locked;       // Is the lock held?
@@ -46,7 +76,7 @@ void spinlock_init(lock_t *lock)
 static inline
 void spin_lock(lock_t *lock)
 {
-	cli(); // disable interrupts to avoid deadlock.
+	pushcli(); // disable interrupts to avoid deadlock.
   if(spin_unlock(lock))
     panic("already acquired");
 
@@ -85,7 +115,7 @@ void spin_unlock(lock_t *lock)
   // not be atomic. A real OS would use C atomics here.
   asm volatile("movl $0, %0" : "+m" (lk->locked) : );
 
-  cli();
+  popcli();
 }
 
 static inline
@@ -93,6 +123,7 @@ bool spin_is_locked(lock_t *lock)
 {
 	return lock->locked;
 }
+
 
 /* Semaphore */
 typedef struct {
