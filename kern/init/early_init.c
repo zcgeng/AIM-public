@@ -201,7 +201,6 @@ void lapicstartap(uchar apicid, uint addr);
 // Start the non-boot (AP) processors.
 static void startothers(void)
 {
-	mpenter();
   extern uchar _binary_entryother_start[], _binary_entryother_end[];
 	uint _binary_entryother_size = (uint)_binary_entryother_end - (uint)_binary_entryother_start;
   uchar *code;
@@ -221,7 +220,7 @@ static void startothers(void)
     // Tell entryother.S what stack to use, where to enter, and what
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
-    //TODO: stack = kalloc();
+    stack = kmalloc(4096, 0);
 		extern ushort gdtdesc_aaaa;
 		*((ushort*)0x6ffe) = V2P(&gdtdesc_aaaa);
     *(void**)(code-4) = stack + KSTACKSIZE;
