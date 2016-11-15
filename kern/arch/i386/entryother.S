@@ -70,9 +70,6 @@ start_other:
 .code32  # Tell assembler to generate 32-bit code now.
 .globl start32_other
 start32_other:
-# debug: test whether other cpu is here
-movb     $38, (0x8000)
-hlt
   # Set up the protected-mode data segment registers
   movw    $(SEG_KDATA<<3), %ax    # Our data segment selector
   movw    %ax, %ds                # -> DS: Data Segment
@@ -87,7 +84,7 @@ hlt
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Use entrypgdir as our initial page table
-  movl    (start_other-12), %eax
+  movl    (0x7000-12), %eax
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax
@@ -95,9 +92,9 @@ hlt
   movl    %eax, %cr0
 
   # Switch to the stack allocated by startothers()
-  movl    (start_other-4), %esp
+  movl    (0x7000-4), %esp
   # Call mpenter()
-  call	 *(start_other-8)
+  call	 *(0x7000-8)
 
   movw    $0x8a00, %ax
   movw    %ax, %dx
