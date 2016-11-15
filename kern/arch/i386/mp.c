@@ -7,15 +7,30 @@
 #include "mp.h"
 #include "asm.h"
 #include "arch-mmu.h"
+#include "libc/string.h"
 
 #define NCPU          8  // maximum number of CPUs
+struct cpu {
+  uchar apicid;                // Local APIC ID
+  struct context *scheduler;   // swtch() here to enter scheduler
+  struct taskstate ts;         // Used by x86 to find stack for interrupt
+  struct segdesc gdt[NSEGS];   // x86 global descriptor table
+  volatile uint started;       // Has the CPU started?
+  int ncli;                    // Depth of pushcli nesting.
+  int intena;                  // Were interrupts enabled before pushcli?
+
+  // Cpu-local storage variables; see below
+  struct cpu *cpu;
+  struct proc *proc;           // The currently-running process.
+};
+
 struct cpu cpus[NCPU];
 int ismp;
 int ncpu;
 uchar ioapicid;
+extern volatile uint *lapic;
 
-static uchar
-sum(uchar *addr, int len)
+static uchar sum(uchar *addr, int len)
 {
   int i, sum;
 

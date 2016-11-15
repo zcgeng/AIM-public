@@ -38,6 +38,7 @@ libarch_la_SOURCES = \
 	ioapic.c\
 	lapic.c \
 	picirq.c \
+	mp.c \
 	do_irq.S
 libarch_la_LIBADD = \
 	mach-$(MACH)/libmach.la
