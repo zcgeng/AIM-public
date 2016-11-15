@@ -3,6 +3,27 @@
 #endif /* HAVE_CONFIG_H */
 #include <aim/memlayout.h>
 #include <arch-mmu.h>
+//
+// assembler macros to create x86 segments
+//
+
+#define SEG_NULLASM                                             \
+        .word 0, 0;                                             \
+        .byte 0, 0, 0, 0
+
+// The 0xC0 means the limit is in 4096-byte units
+// and (for executable segments) 32-bit mode.
+#define SEG_ASM(type,base,lim)                                  \
+        .word (((lim) >> 12) & 0xffff), ((base) & 0xffff);      \
+        .byte (((base) >> 16) & 0xff), (0x90 | (type)),         \
+                (0xC0 | (((lim) >> 28) & 0xf)), (((base) >> 24) & 0xff)
+
+#define STA_X     0x8       // Executable segment
+#define STA_E     0x4       // Expand down (non-executable segments)
+#define STA_C     0x4       // Conforming code segment (executable only)
+#define STA_W     0x2       // Writeable (non-executable segments)
+#define STA_R     0x2       // Readable (executable segments)
+#define STA_A     0x1       // Accessed
 
 # Each non-boot CPU ("AP") is started up in response to a STARTUP
 # IPI from the boot CPU.  Section B.4.2 of the Multi-Processor
@@ -20,7 +41,8 @@
 # of entrypgdir in start-12.
 #
 # This code combines elements of bootasm.S and entry.S.
-
+.globl _binary_entryother_start
+_binary_entryother_start:
 .code16
 .globl start
 start:
@@ -92,3 +114,6 @@ gdt:
 gdtdesc:
   .word   (gdtdesc - gdt - 1)
   .long   gdt
+
+.globl _binary_entryother_end
+_binary_entryother_end:
