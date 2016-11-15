@@ -129,21 +129,39 @@ bool spin_is_locked(lock_t *lock)
 typedef struct {
 	int val;
 	int limit;
+	lock_t spinlock;
 } semaphore_t;
 
 static inline
 void semaphore_init(semaphore_t *sem, int val)
 {
+	spinlock_init(&sem->spinlock);
+	sem->val = val;
+	sem->limit = 20;
 }
 
 static inline
 void semaphore_dec(semaphore_t *sem)
 {
+	while(1){
+		spin_lock(&sem->spinlock);
+		if(sem->val > 0){
+			sem->val--;
+			spin_unlock(&sem->spinlock);
+			break;
+		}
+		else{
+			spin_unlock(&sem->spinlock);
+		}
+	}
 }
 
 static inline
 void semaphore_inc(semaphore_t *sem)
 {
+	spin_lock(&sem->spinlock);
+	sem->val++;
+	spin_unlock(&sem->spinlock);
 }
 
 #endif /* __ASSEMBLER__ */
