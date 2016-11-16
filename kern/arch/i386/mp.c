@@ -169,19 +169,19 @@ void seginit(void)
   loadgs(SEG_KCPU << 3);
 
   // Initialize cpu-local storage.
-  //cpu = c;
-  //proc = 0;
+  set_gs_cpu(c);
+  set_gs_proc(0);
 }
 
 void trap_init();
 // Common CPU setup code.
 static void mpmain(void)
 {
-  kprintf("cpu%d: starting\n", cpunum());
+  kprintf("cpu%d: starting...\n", cpunum());
   trap_init();       // load idt register
-  //xchg(&cpu->started, 1); // tell startothers() we're up
-	//TODO: use the upper line
-	*((uint*)0x7c00) = 1;
+  xchg(&get_gs_cpu()->started, 1); // tell startothers() we're up
+  kprintf("cpu%d: started!\n", cpunum());
+
 	while(1);
   //scheduler();     // start running processes
 }
@@ -228,19 +228,47 @@ void startothers(void)
     *(void**)(code-4) = stack + 2048;
     *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
-		*((uint*)0x7c00) = 0; // TODO: remove this
     lapicstartap(c->apicid, V2P(code));
 
     // wait for cpu to finish mpmain()
-    // TODO: while(c->started == 0);
-		int i = 0;
-		while(*((uint*)0x7c00) != 1){
-			if((i++) % 100000 == 0)
-				kprintf("."); // I don't know why but I must do something here or other cpus won't start.
-		}
-		// TODO: I just use a strange memory position to mark one cpu is on.
-		// I need to use struct cpu to check whether it finishes mpmain
+    while(c->started == 0);
   }
+}
+
+void set_gs_cpu(struct cpu* cpu){
+  asm(
+    "mov %0, %%eax;"
+    "mov %%eax, %%gs:0"
+    ::"m"(cpu)
+  );
+}
+
+struct cpu* get_gs_cpu(){
+  struct cpu* cpu;
+  asm(
+    "mov %%gs:0, %%eax;"
+    "mov %%eax, %0"
+    :"=m"(cpu)
+  );
+  return cpu;
+}
+
+void set_gs_proc(struct proc* proc){
+  asm(
+    "mov %0, %%eax;"
+    "mov %%eax, %%gs:4"
+    ::"m"(proc)
+  );
+}
+
+struct proc* get_gs_proc(){
+  struct proc* proc;
+  asm(
+    "mov %%gs:4, %%eax;"
+    "mov %%eax, %0"
+    :"=m"(proc)
+  );
+  return proc;
 }
 
 void smp_startup(void){
