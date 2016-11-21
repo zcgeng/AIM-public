@@ -24,6 +24,7 @@
 #include <asm.h>
 #include <aim/panic.h>
 #include <aim/sync.h>
+#include <aim/proc.h>
 
 // Pushcli/popcli are like cli/sti except that they are matched:
 // it takes two popcli to undo two pushcli.  Also, if interrupts
@@ -70,14 +71,14 @@ static inline
 void spinlock_init(lock_t *lock)
 {
 	lock->locked = 0;
-	lock->cpu = 0;
+	lock->cpu = NULL;
 }
 
 static inline
 void spin_lock(lock_t *lock)
 {
 	pushcli(); // disable interrupts to avoid deadlock.
-  if(spin_unlock(lock))
+  if(spin_is_locked(lock) && lock->cpu == get_gs_cpu())
     panic("already acquired");
 
   // The xchg is atomic.
@@ -90,7 +91,7 @@ void spin_lock(lock_t *lock)
   __sync_synchronize();
 
   // Record info about lock acquisition for debugging.
-  //lock->cpu = cpu;
+  lock->cpu = get_gs_cpu();
   //getcallerpcs(&lock, lock->pcs);
 }
 
@@ -101,7 +102,7 @@ void spin_unlock(lock_t *lock)
     panic("release non-holding lock");
 
   lock->pcs[0] = 0;
-  lock->cpu = 0;
+  lock->cpu = NULL;
 
   // Tell the C compiler and the processor to not move loads or stores
   // past this point, to ensure that all the stores in the critical
