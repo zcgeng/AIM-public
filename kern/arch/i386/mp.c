@@ -11,6 +11,7 @@
 #include "libc/string.h"
 #include "aim/console.h"
 #include "aim/vmm.h"
+#include "aim/panic.h"
 
 struct cpu cpus[NCPU];
 int ismp;
@@ -203,6 +204,13 @@ void lapicstartap(uchar apicid, uint addr);
 int nr_cpus(void){
   return ncpu;
 }
+
+int cpuid(){
+  struct cpu* c = get_gs_cpu();
+  if(c == NULL) return 0;
+  return c->apicid;
+}
+
 // Start the non-boot (AP) processors.
 void startothers(void)
 {

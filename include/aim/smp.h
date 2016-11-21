@@ -23,8 +23,9 @@
 #ifndef __ASSEMBLER__
 
 int nr_cpus(void);
-int cpuid(void); // TODO
+int cpuid(void);
 void smp_startup(void);
+void broadcast_ipi_ex(uint vector);
 /* Returns 0 when succeed */
 int handle_ipi_interrupt(unsigned int msg); // TODO
 

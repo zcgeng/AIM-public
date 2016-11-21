@@ -203,9 +203,9 @@ lapicstartap(uchar apicid, uint addr)
 }
 
 // broadcast an ipi excluding this cpu
-void broadcast_ipi_ex(uint irq_number){
+void broadcast_ipi_ex(uint vector){
   lapicw(ICRHI, 0);
-  lapicw(ICRLO, BCAST_EX | FIXED | irq_number);
+  lapicw(ICRLO, BCAST_EX | FIXED | vector);
 }
 
 #define CMOS_STATA   0x0a

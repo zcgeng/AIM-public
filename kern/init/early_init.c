@@ -147,5 +147,5 @@ void high_address_entry(){
 	//test_syscall();
 	//test_alloc();
 	smp_startup();
-	panic("succeed !");
+	panic("Finished All the Code !\n");
 }

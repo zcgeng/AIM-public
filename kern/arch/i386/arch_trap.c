@@ -54,6 +54,7 @@ static void set_trap(struct gatedesc *ptr, uint32_t selector, uint32_t offset, u
 void irq0();
 void irq1();
 void irq14();
+void irq38();
 void vec0();
 void vec1();
 void vec2();
@@ -100,6 +101,7 @@ void idt_init(){ // i386 specific
 	set_intr(idt+32 + 0, SEG_KCODE << 3, (uint32_t)irq0, DPL_KERNEL);
 	set_intr(idt+32 + 1, SEG_KCODE << 3, (uint32_t)irq1, DPL_KERNEL);
 	set_intr(idt+32 + 14, SEG_KCODE << 3, (uint32_t)irq14, DPL_KERNEL);
+	set_intr(idt+32 + 38, SEG_KCODE << 3, (uint32_t)irq38, DPL_KERNEL);
 
 	/* the ``idt'' is its virtual address */
 	write_idtr(idt, sizeof(idt));
@@ -110,7 +112,7 @@ void irq_handle(struct TrapFrame *tf) {
 
 	if (irq < 0) {
 		/* "irq_empty" pushed -1 in the trapframe*/
-		panic("Unhandled exception!");
+		panic("Unhandled exception!\n");
 	} else if (irq == 0x80) {
 		tf->eax = handle_syscall(tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp); // i386 specific
 	} else{

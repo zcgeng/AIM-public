@@ -26,6 +26,7 @@
 #include <libc/stdarg.h>
 #include <libc/stddef.h>
 #include <libc/stdio.h>
+#include <aim/smp.h>
 
 /*
  * The rest place for every processor during a panic.
@@ -43,7 +44,7 @@ void __local_panic(void)
 	 * Later on there will be interfaces for the targets and drivers.
 	 * We currently do a tight loop.
 	 */
-
+	 kprintf("CUP %d local panic!\n", cpuid());
 	asm(
 		"LOOP: hlt;"
 		"jmp LOOP;"
@@ -80,7 +81,7 @@ void panic(const char *fmt, ...)
 		kputs("PANIC: message is truncated.");
 	}
 	kputs(__buf);
-	
-	__local_panic();
-}
 
+	broadcast_ipi_ex(32+PANIC_INTERRUPT_NUM); // panic other cpus
+	__local_panic();	// panic itself
+}

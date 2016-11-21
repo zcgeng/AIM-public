@@ -18,6 +18,7 @@
 
 #ifndef _PANIC_H
 #define _PANIC_H
+#define PANIC_INTERRUPT_NUM 38
 
 #ifndef __ASSEMBLER__
 

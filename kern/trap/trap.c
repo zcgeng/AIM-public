@@ -48,17 +48,21 @@ long handle_syscall(long number, ...)
 		}
 	}
 	va_end(ap);
-	
+
 	return 0;
 }
 
 void handle_interrupt(int irq)
 {
 	kpdebug("<IRQ %d>\n", irq);
+	switch(irq){
+		case 1000+PANIC_INTERRUPT_NUM : __local_panic(); break; // IPI
+		default: break;
+	}
 }
 
 void trap_init(void){
-	/* forbid the outside interruptions 
+	/* forbid the outside interruptions
 	 * (but how to "forbid it one by one"?) */
 	cli();
 

@@ -42,6 +42,7 @@
 .globl irq0;     irq0:  pushl $0;  pushl $1000; jmp asm_do_irq
 .globl irq1;     irq1:  pushl $0;  pushl $1001; jmp asm_do_irq
 .globl irq14;   irq14:  pushl $0;  pushl $1014; jmp asm_do_irq
+.globl irq38;   irq38:  pushl $0;  pushl $1038; jmp asm_do_irq
 .globl irq_empty;
 			irq_empty:	pushl $0;  pushl   $-1; jmp asm_do_irq
 
@@ -55,7 +56,7 @@ asm_do_irq:
   pushl %fs
   pushl %gs
   pushal
-  
+
   # Set up data segments.
   movw $(SEG_KDATA<<3), %ax
   movw %ax, %ds
@@ -76,4 +77,3 @@ trap_return:
   popl %ds
   addl $0x8, %esp  # trapno and errcode
   iret
-	
