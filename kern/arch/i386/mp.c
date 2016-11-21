@@ -175,6 +175,7 @@ void seginit(void)
 }
 
 void trap_init();
+extern void test_lock();
 // Common CPU setup code.
 static void mpmain(void)
 {
@@ -183,6 +184,7 @@ static void mpmain(void)
   xchg(&get_gs_cpu()->started, 1); // tell startothers() we're up
   kprintf("cpu%d: started!\n", cpunum());
   sti();
+  test_lock();
 	while(1);
   //scheduler();     // start running processes
 }

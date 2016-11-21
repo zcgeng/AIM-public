@@ -132,13 +132,17 @@ void test_alloc(){
 	}
 }
 
+lock_t testlock;
+int num;
 void test_lock(){
-	lock_t *lock1 = (lock_t*)kmalloc(sizeof(lock_t), 0);
-	spinlock_init(lock1);
-	spin_lock(lock1);
-	spin_lock(lock1);
-
+	while(1){
+		spin_lock(&testlock);
+		kprintf("%d: cpu%d, ---abcdefghijklmnopqrstuvwxyz---\n", num, cpuid());
+		num++;
+		spin_unlock(&testlock);
+	}
 }
+
 
 extern void mpinit();
 extern void lapicinit();
@@ -155,6 +159,7 @@ void high_address_entry(){
 	do_initcalls();
 	//test_syscall();
 	//test_alloc();
+	spinlock_init(&testlock);
 	smp_startup();
 	test_lock();
 	panic("Finished All the Code !\n");
