@@ -54,10 +54,9 @@ long handle_syscall(long number, ...)
 
 void handle_interrupt(int irq)
 {
-	kpdebug("<IRQ %d>\n", irq);
 	switch(irq){
 		case 1000+PANIC_INTERRUPT_NUM : __local_panic(); break; // IPI
-		default: break;
+		default: kpdebug("<IRQ %d>\n", irq); break;
 	}
 }
 
