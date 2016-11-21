@@ -159,8 +159,8 @@ void high_address_entry(){
 	do_initcalls();
 	//test_syscall();
 	//test_alloc();
-	spinlock_init(&testlock);
+	//spinlock_init(&testlock);
 	smp_startup();
-	test_lock();
+	//test_lock();
 	panic("Finished All the Code !\n");
 }
