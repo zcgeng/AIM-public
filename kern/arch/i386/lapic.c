@@ -45,6 +45,7 @@ void            microdelay(int);
   #define DEASSERT   0x00000000
   #define LEVEL      0x00008000   // Level triggered
   #define BCAST      0x00080000   // Send to all APICs, including self.
+  #define BCAST_EX   0x000C0000  // Send to all APICs, excluding self.
   #define BUSY       0x00001000
   #define FIXED      0x00000000
 #define ICRHI   (0x0310/4)   // Interrupt Command [63:32]
@@ -199,6 +200,12 @@ lapicstartap(uchar apicid, uint addr)
     lapicw(ICRLO, STARTUP | (addr>>12));
     microdelay(200);
   }
+}
+
+// broadcast an ipi excluding this cpu
+void broadcast_ipi_ex(uint irq_number){
+  lapicw(ICRHI, 0);
+  lapicw(ICRLO, BCAST_EX | FIXED | irq_number);
 }
 
 #define CMOS_STATA   0x0a

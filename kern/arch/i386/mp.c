@@ -181,7 +181,7 @@ static void mpmain(void)
   trap_init();       // load idt register
   xchg(&get_gs_cpu()->started, 1); // tell startothers() we're up
   kprintf("cpu%d: started!\n", cpunum());
-
+  sti();
 	while(1);
   //scheduler();     // start running processes
 }
