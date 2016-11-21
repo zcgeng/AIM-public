@@ -40,6 +40,8 @@ libarch_la_SOURCES = \
 	lapic.c \
 	picirq.c \
 	mp.c \
-	do_irq.S
+	do_irq.S \
+	proc.c \
+	switch.S
 libarch_la_LIBADD = \
 	mach-$(MACH)/libmach.la
