@@ -25,6 +25,7 @@
 #include <aim/panic.h>
 #include <aim/sync.h>
 #include <aim/proc.h>
+#include <aim/debug.h>
 
 // Pushcli/popcli are like cli/sti except that they are matched:
 // it takes two popcli to undo two pushcli.  Also, if interrupts
@@ -75,11 +76,17 @@ void spinlock_init(lock_t *lock)
 }
 
 static inline
+bool spin_is_locked(lock_t *lock)
+{
+	return lock->locked;
+}
+
+static inline
 void spin_lock(lock_t *lock)
 {
 	pushcli(); // disable interrupts to avoid deadlock.
   if(spin_is_locked(lock) && lock->cpu == get_gs_cpu())
-    panic("already acquired");
+    panic("already acquired!\n");
 
   // The xchg is atomic.
   while(xchg(&lock->locked, 1) != 0)
@@ -114,17 +121,10 @@ void spin_unlock(lock_t *lock)
   // Release the lock, equivalent to lk->locked = 0.
   // This code can't use a C assignment, since it might
   // not be atomic. A real OS would use C atomics here.
-  asm volatile("movl $0, %0" : "+m" (lk->locked) : );
+  asm volatile("movl $0, %0" : "+m" (lock->locked) : );
 
   popcli();
 }
-
-static inline
-bool spin_is_locked(lock_t *lock)
-{
-	return lock->locked;
-}
-
 
 /* Semaphore */
 typedef struct {

@@ -36,6 +36,7 @@
 #include <aim/initcalls.h>
 #include <asm.h>
 #include <aim/proc.h>
+#include <aim/sync.h>
 #include <aim/memlayout.h>
 #include <aim/smp.h>
 
@@ -131,6 +132,14 @@ void test_alloc(){
 	}
 }
 
+void test_lock(){
+	lock_t *lock1 = (lock_t*)kmalloc(sizeof(lock_t), 0);
+	spinlock_init(lock1);
+	spin_lock(lock1);
+	spin_lock(lock1);
+
+}
+
 extern void mpinit();
 extern void lapicinit();
 extern void picinit();
@@ -147,5 +156,6 @@ void high_address_entry(){
 	//test_syscall();
 	//test_alloc();
 	smp_startup();
+	test_lock();
 	panic("Finished All the Code !\n");
 }

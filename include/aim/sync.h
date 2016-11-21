@@ -67,6 +67,7 @@ typedef struct {
 	.depth = 0 \
 }
 
+extern int cpuid();
 static inline void recursive_lock(rlock_t *lock)
 {
 	if (lock->holder != cpuid()) {
@@ -115,4 +116,3 @@ void semaphore_inc(semaphore_t *sem);
 #endif /* !__ASSEMBLER__ */
 
 #endif /* _AIM_SYNC_H */
-

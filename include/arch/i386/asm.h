@@ -15,6 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef __ASM_H
+#define __ASM_H
 #include <sys/types.h>
 
 static inline void
@@ -237,3 +240,5 @@ void jmp(void *addr){
 	);
 	for(;;);
 }
+
+#endif

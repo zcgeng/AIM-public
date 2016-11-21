@@ -1,3 +1,5 @@
+#ifndef __PROC_H
+#define __PROC_H
 #include <arch-mmu.h>
 // Per-CPU state
 #define NCPU 8
@@ -77,3 +79,5 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+#endif
