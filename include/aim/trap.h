@@ -19,14 +19,13 @@
 #ifndef _AIM_TRAP_H
 #define _AIM_TRAP_H
 
-struct TrapFrame;
+struct trapframe;
 
 void trap_init(void);
 __noreturn
-void trap_return(struct TrapFrame *tf);
+void trap_return(struct trapframe *tf);
 
 long handle_syscall(long number, ...);
 void handle_interrupt(int irq);
 
 #endif /* _AIM_TRAP_H */
-

@@ -60,7 +60,7 @@
 
 #ifndef __ASSEMBLER__
 
-struct TrapFrame {
+struct trapframe {
 	// registers as pushed by pusha
   uint edi;
   uint esi;
@@ -97,10 +97,9 @@ struct TrapFrame {
 
 void i8259_init(void);
 void idt_init();
-void irq_handle(struct TrapFrame *tf);
+void irq_handle(struct trapframe *tf);
 
 
 #endif	/* !__ASSEMBLER__ */
 
 #endif /* _ARCH_TRAP_H */
-

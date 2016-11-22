@@ -107,7 +107,7 @@ void idt_init(){ // i386 specific
 	write_idtr(idt, sizeof(idt));
 }
 
-void irq_handle(struct TrapFrame *tf) {
+void irq_handle(struct trapframe *tf) {
 	int irq = tf->trapno;
 
 	if (irq < 0) {

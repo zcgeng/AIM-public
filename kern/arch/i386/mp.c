@@ -13,7 +13,7 @@
 #include "aim/vmm.h"
 #include "aim/panic.h"
 
-struct cpu cpus[NCPU];
+struct percpu cpus[NCPU];
 int ismp;
 int ncpu;
 uchar ioapicid;
@@ -151,7 +151,7 @@ int cpunum();
 // Run once on entry on each CPU.
 void seginit(void)
 {
-  struct cpu *c;
+  struct percpu *c;
 
   // Map "logical" addresses to virtual addresses using identity map.
   // Cannot share a CODE descriptor for both kernel and user
@@ -164,7 +164,7 @@ void seginit(void)
   c->gdt[SEG_UDATA] = SEG(STA_W, 0, 0xffffffff, DPL_USER);
 
   // Map cpu and proc -- these are private per cpu.
-  c->gdt[SEG_KCPU] = SEG(STA_W, &c->cpu, 8, 0);
+  c->gdt[SEG_KCPU] = SEG(STA_W, &c->percpu, 8, 0);
 
   lgdt(c->gdt, sizeof(c->gdt));
   loadgs(SEG_KCPU << 3);
@@ -208,7 +208,7 @@ int nr_cpus(void){
 }
 
 int cpuid(){
-  struct cpu* c = get_gs_cpu();
+  struct percpu* c = get_gs_cpu();
   if(c == NULL) return 0;
   return c->apicid;
 }
@@ -219,7 +219,7 @@ void startothers(void)
   extern uchar _binary_entryother_start[], _binary_entryother_end[];
 	uint _binary_entryother_size = (uint)_binary_entryother_end - (uint)_binary_entryother_start;
   uchar *code;
-  struct cpu *c;
+  struct percpu *c;
   char *stack = NULL;
 
   // Write entry code to unused memory at 0x7000.
@@ -245,22 +245,22 @@ void startothers(void)
   }
 }
 
-void set_gs_cpu(struct cpu* cpu){
+void set_gs_cpu(struct percpu* c){
   asm(
     "mov %0, %%eax;"
     "mov %%eax, %%gs:0"
-    ::"m"(cpu)
+    ::"m"(c)
   );
 }
 
-struct cpu* get_gs_cpu(){
-  struct cpu* cpu;
+struct percpu* get_gs_cpu(){
+  struct percpu* c;
   asm(
     "mov %%gs:0, %%eax;"
     "mov %%eax, %0"
-    :"=m"(cpu)
+    :"=m"(c)
   );
-  return cpu;
+  return c;
 }
 
 void set_gs_proc(struct proc* proc){

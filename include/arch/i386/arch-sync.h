@@ -61,7 +61,7 @@ typedef struct spinlock {
 
   // For debugging:
   //char *name;        // Name of lock.
-	struct cpu *cpu;   // The cpu holding the lock.
+	struct percpu *percpu;   // The cpu holding the lock.
   uint pcs[10];      // The call stack (an array of program counters)
                      // that locked the lock.
 }lock_t;
@@ -72,7 +72,7 @@ static inline
 void spinlock_init(lock_t *lock)
 {
 	lock->locked = 0;
-	lock->cpu = NULL;
+	lock->percpu = NULL;
 }
 
 static inline
@@ -85,7 +85,7 @@ static inline
 void spin_lock(lock_t *lock)
 {
 	pushcli(); // disable interrupts to avoid deadlock.
-  if(spin_is_locked(lock) && lock->cpu == get_gs_cpu())
+  if(spin_is_locked(lock) && lock->percpu == get_gs_cpu())
     panic("already acquired!\n");
 
   // The xchg is atomic.
@@ -98,7 +98,7 @@ void spin_lock(lock_t *lock)
   __sync_synchronize();
 
   // Record info about lock acquisition for debugging.
-  lock->cpu = get_gs_cpu();
+  lock->percpu = get_gs_cpu();
   //getcallerpcs(&lock, lock->pcs);
 }
 
@@ -109,7 +109,7 @@ void spin_unlock(lock_t *lock)
     panic("release non-holding lock");
 
   lock->pcs[0] = 0;
-  lock->cpu = NULL;
+  lock->percpu = NULL;
 
   // Tell the C compiler and the processor to not move loads or stores
   // past this point, to ensure that all the stores in the critical

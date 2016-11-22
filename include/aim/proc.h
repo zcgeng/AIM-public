@@ -26,25 +26,12 @@
 //#include <list.h>
 //#include <file.h>
 #include <arch-mmu.h>
-
-// Per-CPU state
-#define NCPU 8
+#include <aim/percpu.h>
 #define NOFILE       16  // open files per process
-struct cpu {
-  uchar apicid;                // Local APIC ID
-  struct context *scheduler;   // swtch() here to enter scheduler
-  struct taskstate ts;         // Used by x86 to find stack for interrupt
-  struct segdesc gdt[NSEGS];   // x86 global descriptor table
-  volatile uint started;       // Has the CPU started?
-  int ncli;                    // Depth of pushcli nesting.
-  int intena;                  // Were interrupts enabled before pushcli?
 
-  // Cpu-local storage variables; see below
-  struct cpu *cpu;
-  struct proc *proc;           // The currently-running process.
-};
-
-extern struct cpu cpus[NCPU];
+struct percpu;
+struct proc;
+extern struct percpu cpus[NCPU];
 extern int ncpu;
 
 // Per-CPU variables, holding pointers to the
@@ -57,29 +44,12 @@ extern int ncpu;
 // in thread libraries such as Linux pthreads.
 // extern struct cpu *cpu asm("%gs:0");       // &cpus[cpunum()]
 // extern struct proc *proc asm("%gs:4");     // cpus[cpunum()].proc
-void set_gs_cpu(struct cpu* cpu);
-struct cpu* get_gs_cpu();
+void set_gs_cpu(struct percpu* c);
+struct percpu* get_gs_cpu();
 void set_gs_proc(struct proc* proc);
 struct proc* get_gs_proc();
 
 //PAGEBREAK: 17
-// Saved registers for kernel context switches.
-// Don't need to save all the segment registers (%cs, etc),
-// because they are constant across kernel contexts.
-// Don't need to save %eax, %ecx, %edx, because the
-// x86 convention is that the caller has saved them.
-// Contexts are stored at the bottom of the stack they
-// describe; the stack pointer is the address of the context.
-// The layout of the context matches the layout of the stack in swtch.S
-// at the "Switch stacks" comment. Switch doesn't save eip explicitly,
-// but it is on the stack and allocproc() manipulates it.
-struct context {
-  uint edi;
-  uint esi;
-  uint ebx;
-  uint ebp;
-  uint eip;
-};
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
@@ -101,6 +71,11 @@ struct proc_xv6 {
 };
 
 struct proc {
+
+  // from proc_xv6
+  uint sz;                     // Size of process memory (bytes)
+  struct trapframe *tf;        // Trap frame for current syscall
+
 	/* TODO: move thread-specific data into a separate structure */
 	/*
 	 * the kernel stack pointer is used to prepare C runtime, thus accessed

@@ -29,6 +29,7 @@
 #include <aim/percpu.h>
 #include <aim/vmm.h>
 #include <aim/proc.h>
+#include <arch-trap.h>
 //#include <aim/sched.h>
 #include <aim/smp.h>
 //#include <aim/sync.h>
@@ -177,4 +178,3 @@ void idle_init(void)
 	cpu_idleproc->mm = kernel_mm;
 	cpu_idleproc->kpid = 0;
 }
-
