@@ -53,6 +53,7 @@ SECTIONS
 	}
 	.initcalls :
 	{
+    . += 0x10; /* Get away from the dangerous stack */
 		EARLY_INIT(8);
 		NORM_INIT(8);
 		LATE_INIT(8);

@@ -46,25 +46,7 @@ void arch_early_init(void)
 {
 	lgdt(gdt, sizeof(gdt)); // setup kernel segment descriptors.
 	early_mm_init();
-	/* Turn on page size extension for 4Mbyte pages */
-	asm(
-		"mov    %%cr4, %%eax;"
-		"or     %0, %%eax;"
-		"mov    %%eax, %%cr4;"
-		::"i"(CR4_PSE)
-	);
-	/* Set page directory */
-	asm(
-		"mov    %0, %%cr3;"
-		::"r"(V2P(entrypgdir))
-	);
-	/* Turn on paging */
-	asm(
-		"mov	%%cr0, %%eax;"
-		"or	%0, %%eax;"
-		"mov	%%eax, %%cr0;"
-		::"i"(CR0_PG | CR0_WP)
-	);
+	mmu_init(entrypgdir);
 	/* Set up the stack pointer. */
 	asm(
 		"mov	%0, %%esp;"

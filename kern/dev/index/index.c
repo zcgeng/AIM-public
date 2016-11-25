@@ -85,7 +85,7 @@ int do_initcalls(){
 	}
 	return 0;
 }
-// 
+//
 // void initdev(struct device *dev, int class, const char *devname, dev_t devno,struct driver *drv){
 // 	dev->class = class;
 // 	memcpy(dev->name, devname, DEV_NAME_MAX);

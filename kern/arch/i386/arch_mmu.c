@@ -63,8 +63,36 @@ void page_index_clear(pgindex_t *index)
 {
 }
 
+int switch_pgindex(pgindex_t *pgindex){
+	/* Set page directory */
+	asm(
+		"mov    %0, %%cr3;"
+		::"r"(V2P(pgindex))
+	);
+	return 0;
+}
+
 void mmu_init(pgindex_t *boot_page_index)
 {
+	/* Turn on page size extension for 4Mbyte pages */
+	asm(
+		"mov    %%cr4, %%eax;"
+		"or     %0, %%eax;"
+		"mov    %%eax, %%cr4;"
+		::"i"(CR4_PSE)
+	);
+	/* Set page directory */
+	asm(
+		"mov    %0, %%cr3;"
+		::"r"(V2P(boot_page_index))
+	);
+	/* Turn on paging */
+	asm(
+		"mov	%%cr0, %%eax;"
+		"or	%0, %%eax;"
+		"mov	%%eax, %%cr0;"
+		::"i"(CR0_PG | CR0_WP)
+	);
 }
 
 __noreturn
