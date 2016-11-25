@@ -22,4 +22,17 @@
 
 .text
 switch_regs:
+  // esp+4: arg0
+  // esp+8: arg1
+  mov 0x4(%esp), %eax
+  mov %edi, (%eax)
+  mov %esi, 0x4(%eax)
+  mov %ebx, 0x8(%eax)
+  mov %ebp, 0xc(%eax)
 
+  mov 0x8(%esp), %eax
+  mov (%eax), %edi
+  mov 0x4(%eax), %esi
+  mov 0x8(%eax), %ebx
+  mov 0xc(%eax), %ebp
+  ret

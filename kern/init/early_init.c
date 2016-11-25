@@ -148,7 +148,7 @@ extern void mpinit();
 extern void lapicinit();
 extern void picinit();
 extern void ioapicinit();
-
+extern void switch_regs(struct context *old, struct context *new);
 void high_address_entry(){
 	allocator_init();
 	mpinit();
@@ -162,5 +162,10 @@ void high_address_entry(){
 	//spinlock_init(&testlock);
 	smp_startup();
 	//test_lock();
+
+	// test switch_regs()
+	struct context c = {1000, 1001, 1002, 1003, 1004};
+	switch_regs(&(current_proc->context), &c);
+
 	panic("Finished All the Code !\n");
 }
