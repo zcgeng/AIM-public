@@ -81,11 +81,7 @@ void mmu_init(pgindex_t *boot_page_index)
 		"mov    %%eax, %%cr4;"
 		::"i"(CR4_PSE)
 	);
-	/* Set page directory */
-	asm(
-		"mov    %0, %%cr3;"
-		::"r"(V2P(boot_page_index))
-	);
+	switch_pgindex(boot_page_index);
 	/* Turn on paging */
 	asm(
 		"mov	%%cr0, %%eax;"
