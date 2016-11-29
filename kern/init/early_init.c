@@ -164,8 +164,8 @@ void high_address_entry(){
 	//test_lock();
 
 	// test switch_regs()
-	struct context c = {1000, 1001, 1002, 1003, 1004};
-	switch_regs(&(current_proc->context), &c);
+	// struct context c = {1000, 1001, 1002, 1003, 1004};
+	// switch_regs(&(current_proc->context), &c);
 
 	panic("Finished All the Code !\n");
 }

@@ -144,4 +144,3 @@ void sched_init(void)
 {
 	//spinlock_init(&sched_lock);
 }
-

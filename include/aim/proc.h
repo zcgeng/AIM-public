@@ -31,7 +31,7 @@
 
 struct percpu;
 struct proc;
-extern struct percpu cpus[NCPU];
+
 extern int ncpu;
 
 // Per-CPU variables, holding pointers to the
@@ -151,6 +151,7 @@ struct proc {
 	struct scheduler *scheduler;	/* Scheduler for this process */
 	struct list_head sched_node;	/* List node in scheduler */
 };
+extern struct proc idleproc[MAX_CPUS];
 
 static inline void *kstacktop(struct proc *proc)
 {
