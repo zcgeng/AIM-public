@@ -23,22 +23,24 @@
 
 static inline void local_irq_enable()
 {
+	asm("sti;");
 }
 
 static inline void local_irq_disable()
 {
-
+	asm("cli;");
 }
 
 #define local_irq_save(flags) \
 	do { \
+		flags = readeflags(); \
 	} while (0)
 
 #define local_irq_restore(flags) \
 	do { \
+		seteflags(flags); \
 	} while (0)
 
 #endif /* !__ASSEMBLER__ */
 
 #endif /* _ARCH_IRQ_H */
-

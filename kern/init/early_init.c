@@ -169,7 +169,7 @@ void high_address_entry(){
 	//spinlock_init(&testlock);
 	smp_startup();
 	//test_lock();
-	test_switch_regs();
+	//test_switch_regs();
 
 	panic("Finished All the Code !\n");
 }

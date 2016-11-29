@@ -86,8 +86,14 @@ static inline uint32_t
 readeflags(void)
 {
   uint32_t eflags;
-  asm volatile("pushfl; popl %0" : "=r" (eflags));
+  asm volatile("pushfl; popl %0;" : "=r" (eflags));
   return eflags;
+}
+
+static inline void
+seteflags(uint32_t eflags)
+{
+  asm volatile("pushl %0; popfl;" :: "r" (eflags));
 }
 
 static inline void
