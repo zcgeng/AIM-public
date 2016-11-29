@@ -18,7 +18,7 @@
 
 #ifndef _ARCH_IRQ_H
 #define _ARCH_IRQ_H
-
+#include <asm.h>
 #ifndef __ASSEMBLER__
 
 static inline void local_irq_enable()
