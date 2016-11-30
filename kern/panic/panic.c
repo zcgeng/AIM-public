@@ -45,7 +45,6 @@ void __local_panic(void)
 	 * We currently do a tight loop.
 	 */
 	 kprintf("CUP %d local panic!\n", cpuid());
-	 for(;;);
 	asm(
 		"LOOP: hlt;"
 		"jmp LOOP;"

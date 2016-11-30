@@ -156,6 +156,7 @@ extern void mpinit();
 extern void lapicinit();
 extern void picinit();
 extern void ioapicinit();
+extern void timerinit();
 void high_address_entry(){
 	allocator_init();
 	mpinit();
@@ -169,6 +170,8 @@ void high_address_entry(){
 	//test_alloc();
 	//spinlock_init(&testlock);
 	smp_startup();
+	if(!ismp)
+		timerinit();   // uniprocessor timer
 	//test_lock();
 	//test_switch_regs();
 
