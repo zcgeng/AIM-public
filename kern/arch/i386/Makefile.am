@@ -42,6 +42,7 @@ libarch_la_SOURCES = \
 	mp.c \
 	do_irq.S \
 	proc.c \
-	switch.S
+	switch.S \
+	arch_timer.c
 libarch_la_LIBADD = \
 	mach-$(MACH)/libmach.la
