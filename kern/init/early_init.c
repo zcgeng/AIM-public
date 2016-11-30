@@ -163,6 +163,7 @@ void high_address_entry(){
 	picinit();       // another interrupt controller
 	ioapicinit();    // another interrupt controller
 	trap_init();
+	sti();
 	do_initcalls();
 	//test_syscall();
 	//test_alloc();

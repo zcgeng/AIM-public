@@ -29,6 +29,7 @@
 #include <asm.h>
 #include <aim/panic.h>
 #include <arch-trap.h>
+#include <aim/smp.h>
 
 long handle_syscall(long number, ...)
 {
@@ -55,7 +56,12 @@ long handle_syscall(long number, ...)
 void handle_interrupt(int irq)
 {
 	switch(irq){
-		case 1000+PANIC_INTERRUPT_NUM : __local_panic(); break; // IPI
+		case T_IRQ0 + IRQ_TIMER:
+			kpdebug("CPU%d received a timer interrupt\n", cpuid());
+			break;
+		case T_IRQ0 + PANIC_INTERRUPT_NUM :
+			__local_panic(); // IPI panic
+			break;
 		default: kpdebug("<IRQ %d>\n", irq); break;
 	}
 }

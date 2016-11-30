@@ -56,6 +56,7 @@
 #define IRQ_IDE         14
 #define IRQ_ERROR       19
 #define IRQ_SPURIOUS    31
+#define PANIC_INTERRUPT_NUM 38
 
 
 #ifndef __ASSEMBLER__
