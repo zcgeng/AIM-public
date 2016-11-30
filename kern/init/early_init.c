@@ -137,7 +137,7 @@ int num;
 void test_lock(){
 	while(1){
 		spin_lock(&testlock);
-		kprintf("%d: cpu%d, ---abcdefghijklmnopqrstuvwxyz---\n", num, cpuid());
+		kprintf("cpu%d: num=%d\n", cpuid(), num);
 		num++;
 		spin_unlock(&testlock);
 	}
