@@ -30,9 +30,9 @@
 #include <aim/vmm.h>
 #include <aim/proc.h>
 #include <arch-trap.h>
-//#include <aim/sched.h>
+#include <aim/sched.h>
 #include <aim/smp.h>
-//#include <aim/sync.h>
+#include <aim/sync.h>
 #include <aim/uvm.h>
 #include <bitmap.h>
 
@@ -119,7 +119,6 @@ struct proc *proc_new(struct namespace *ns)
 	proc->heapsize = 0;
 	proc->heapbase = NULL;
 	memset(&(proc->name), 0, sizeof(proc->name));
-	proc->sched_node.p = proc;
 	//proc->cwd = proc->rootd = NULL;
 	//memset(&proc->fd, 0, sizeof(proc->fd));
 	//spinlock_init(&proc->fdlock);
@@ -134,8 +133,9 @@ struct proc *proc_new(struct namespace *ns)
 	proc->first_child = NULL;
 	proc->next_sibling = NULL;
 	proc->prev_sibling = NULL;
-	//proc->scheduler = scheduler;
-	//list_init(&(proc->sched_node));
+	proc->scheduler = scheduler;
+	list_init(&(proc->sched_node));
+	proc->sched_node.p = proc;
 
 	return proc;
 rollback_proc:

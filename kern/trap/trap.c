@@ -55,9 +55,13 @@ long handle_syscall(long number, ...)
 
 void handle_interrupt(int irq)
 {
+	extern void lapiceoi();
+
 	switch(irq){
 		case T_IRQ0 + IRQ_TIMER:
-			kpdebug("CPU%d received a timer interrupt\n", cpuid());
+			if(cpuid() != 0)
+				kpdebug("CPU%d received a timer interrupt\n", cpuid());
+			lapiceoi();
 			break;
 		case T_IRQ0 + PANIC_INTERRUPT_NUM :
 			__local_panic(); // IPI panic
