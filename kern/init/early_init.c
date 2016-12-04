@@ -158,7 +158,6 @@ extern void lapicinit();
 extern void picinit();
 extern void ioapicinit();
 extern void timerinit();
-extern void schedule();
 void high_address_entry(){
 	allocator_init();
 	mpinit();
@@ -177,6 +176,7 @@ void high_address_entry(){
 		timerinit();   // uniprocessor timer
 	//test_lock();
 	//test_switch_regs();
+	sched_init();
 	schedule();
 	panic("Finished All the Code !\n");
 }

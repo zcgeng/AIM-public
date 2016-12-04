@@ -34,6 +34,7 @@
 
 struct list_head {
 	struct list_head *next, *prev;
+	struct proc* p;
 };
 
 static inline void INIT_LIST_HEAD(struct list_head *list)
@@ -184,4 +185,3 @@ static inline int list_is_singular(const struct list_head *head)
 #endif /* !__ASSEMBLER__ */
 
 #endif /* _LIST_H */
-

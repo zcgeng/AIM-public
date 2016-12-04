@@ -143,7 +143,13 @@ struct proc *proc_next(struct proc *proc)
 }
 
 
+
+
+static struct proc *	pick(void){
+	return NULL;
+}
 static int add(struct proc *p){
+	list_add_tail(&scheduler->list, &p->sched_node);
 	return 0;
 }
 static int remove(struct proc *p){
@@ -160,8 +166,11 @@ void sched_init(void)
 {
 	spinlock_init(&sched_lock);
 	scheduler = (struct scheduler*)kmalloc(sizeof(struct scheduler), 0);
+	list_init(&scheduler->list);
+	scheduler->list.p = NULL;
 	scheduler->add = add;
 	scheduler->remove = remove;
 	scheduler->next = next;
 	scheduler->find = find;
+	scheduler->pick = pick;
 }

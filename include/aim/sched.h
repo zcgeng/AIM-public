@@ -42,6 +42,7 @@ struct scheduler {
 	 * Return a proc to be scheduled onto processor, or NULL to
 	 * indicate that the processor should be idle.
 	 */
+	struct list_head list;
 	struct proc *	(*pick)(void);
 	int		(*add)(struct proc *);
 	/* Remove a specific proc from proc list */
@@ -75,4 +76,3 @@ void wakeup(void *bed);
 #endif
 
 #endif
-

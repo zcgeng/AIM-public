@@ -119,6 +119,7 @@ struct proc *proc_new(struct namespace *ns)
 	proc->heapsize = 0;
 	proc->heapbase = NULL;
 	memset(&(proc->name), 0, sizeof(proc->name));
+	proc->sched_node.p = proc;
 	//proc->cwd = proc->rootd = NULL;
 	//memset(&proc->fd, 0, sizeof(proc->fd));
 	//spinlock_init(&proc->fdlock);
