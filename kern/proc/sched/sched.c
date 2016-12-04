@@ -146,20 +146,32 @@ struct proc *proc_next(struct proc *proc)
 
 
 static struct proc *	pick(void){
-	return NULL;
+	// FCFS
+	struct proc *p = scheduler->list.p;
+	list_del(&scheduler->list);
+	return p;
 }
 static int add(struct proc *p){
-	list_add_tail(&scheduler->list, &p->sched_node);
+	list_add_tail(&p->sched_node, &scheduler->list);
 	return 0;
 }
 static int remove(struct proc *p){
+	list_del(&p->sched_node);
 	return 0;
 }
 static struct proc* next(struct proc *p){
-	return NULL;
+	return p->sched_node.next->p;
 }
 static struct proc* find(pid_t pid, struct namespace *ns){
-	return NULL;
+	struct proc* p = NULL;
+	struct list_head *pos = NULL;
+	for_each(pos, &scheduler->list){
+		if(pos->p->pid == pid){
+			p = pos->p;
+			break;
+		}
+	}
+	return p;
 }
 
 void sched_init(void)
