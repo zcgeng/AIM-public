@@ -28,6 +28,7 @@
 #include <libc/stdio.h>
 #include <aim/smp.h>
 #include <arch-trap.h>
+#include <arch-irq.h>
 
 /*
  * The rest place for every processor during a panic.
@@ -69,9 +70,9 @@ void panic(const char *fmt, ...)
 	va_list args;
 	int result;
 
-	//local_irq_disable();
+	local_irq_disable();
 
-	//panic_other_cpus();
+	panic_other_cpus();
 
 	va_start(args, fmt);
 	result = vsnprintf(__buf, BUFSIZ, fmt, args);
@@ -83,6 +84,9 @@ void panic(const char *fmt, ...)
 	}
 	kputs(__buf);
 
-	broadcast_ipi_ex(T_IRQ0 + PANIC_INTERRUPT_NUM); // panic other cpus
 	__local_panic();	// panic itself
+}
+
+void panic_other_cpus(){
+	broadcast_ipi_ex(T_IRQ0 + PANIC_INTERRUPT_NUM);
 }

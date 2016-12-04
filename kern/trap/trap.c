@@ -59,14 +59,16 @@ void handle_interrupt(int irq)
 
 	switch(irq){
 		case T_IRQ0 + IRQ_TIMER:
-			if(cpuid() != 0)
-				kpdebug("CPU%d received a timer interrupt\n", cpuid());
+			kpdebug("CPU%d received a timer interrupt\n", cpuid());
 			lapiceoi();
 			break;
 		case T_IRQ0 + PANIC_INTERRUPT_NUM :
 			__local_panic(); // IPI panic
 			break;
-		default: kpdebug("<IRQ %d>\n", irq); break;
+		default:
+			kpdebug("<IRQ %d>\n", irq);
+			lapiceoi();
+			break;
 	}
 }
 
