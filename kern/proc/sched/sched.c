@@ -28,6 +28,7 @@
 #include <aim/proc.h>
 #include <aim/sched.h>
 #include <aim/smp.h>
+#include <aim/vmm.h>
 
 static lock_t sched_lock;
 static unsigned long __sched_intrflags;
@@ -141,7 +142,26 @@ struct proc *proc_next(struct proc *proc)
 	return scheduler->next(proc);
 }
 
+
+static int add(struct proc *p){
+	return 0;
+}
+static int remove(struct proc *p){
+	return 0;
+}
+static struct proc* next(struct proc *p){
+	return NULL;
+}
+static struct proc* find(pid_t pid, struct namespace *ns){
+	return NULL;
+}
+
 void sched_init(void)
 {
 	spinlock_init(&sched_lock);
+	scheduler = (struct scheduler*)kmalloc(sizeof(struct scheduler), 0);
+	scheduler->add = add;
+	scheduler->remove = remove;
+	scheduler->next = next;
+	scheduler->find = find;
 }
