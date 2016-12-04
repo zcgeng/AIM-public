@@ -147,6 +147,9 @@ struct proc *proc_next(struct proc *proc)
 
 static struct proc *	pick(void){
 	// FCFS
+	if(list_empty(&scheduler->list)){
+		return NULL;
+	}
 	struct proc *p = scheduler->list.p;
 	list_del(&scheduler->list);
 	return p;

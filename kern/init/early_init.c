@@ -177,6 +177,6 @@ void high_address_entry(){
 	//test_lock();
 	//test_switch_regs();
 	sched_init();
-	schedule();
+	//schedule();
 	panic("Finished All the Code !\n");
 }
