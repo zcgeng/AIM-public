@@ -117,6 +117,7 @@ int map_pages(pgindex_t *pgindex, void *vaddr, addr_t paddr, size_t size, uint32
 }
 
 ssize_t unmap_pages(pgindex_t *pgindex, void *vaddr, size_t size, addr_t *paddr){
+	panic("implement me!");
 	return -1;
 }
 
@@ -128,7 +129,7 @@ pgindex_t *init_pgindex(void){
 
 void destroy_pgindex(pgindex_t *pgindex){
 	page_index_clear(pgindex);
-	pgfree(pgindex);
+	pgfree(V2P(pgindex));
 }
 
 int set_pages_perm(pgindex_t *pgindex, void *vaddr, size_t size, uint32_t flags){
@@ -145,7 +146,6 @@ int set_pages_perm(pgindex_t *pgindex, void *vaddr, size_t size, uint32_t flags)
     if(a == last)
       break;
     a += PGSIZE;
-    paddr += PGSIZE;
   }
   return 0;
 }
