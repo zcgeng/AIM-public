@@ -127,6 +127,8 @@ pgindex_t *init_pgindex(void){
 }
 
 void destroy_pgindex(pgindex_t *pgindex){
+	page_index_clear(pgindex);
+	pgfree(pgindex);
 }
 
 int set_pages_perm(pgindex_t *pgindex, void *vaddr, size_t size, uint32_t flags){
