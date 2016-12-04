@@ -121,7 +121,9 @@ ssize_t unmap_pages(pgindex_t *pgindex, void *vaddr, size_t size, addr_t *paddr)
 }
 
 pgindex_t *init_pgindex(void){
-	return NULL;
+	pgindex_t *pgindex = (pgindex_t*)P2V((int)pgalloc());
+	memset(pgindex, 0, PGSIZE);
+	return pgindex;
 }
 
 void destroy_pgindex(pgindex_t *pgindex){
