@@ -28,6 +28,7 @@
 #include <arch-mmu.h>
 #include <aim/memlayout.h>
 #include <aim/pmm.h>
+#include <aim/panic.h>
 
 __attribute__((__aligned__(PGSIZE)))
 pgindex_t entrypgdir[NPDENTRIES];
@@ -85,8 +86,51 @@ walkpgdir(pgindex_t *pgdir, const void *va, int alloc)
   return &pgtab[PTX(va)];
 }
 
-void page_index_clear(pgindex_t *index)
-{
+void page_index_clear(pgindex_t *index){
+}
+
+int map_pages(pgindex_t *pgindex, void *vaddr, addr_t paddr, size_t size, uint32_t flags){
+	char *a, *last;
+  pte_t *pte;
+
+  a = (char*)PGROUNDDOWN((uint)vaddr);
+  last = (char*)PGROUNDDOWN(((uint)vaddr) + size - 1);
+  for(;;){
+    if((pte = walkpgdir(pgindex, a, 1)) == 0)
+      return -1;
+    if(*pte & PTE_P)
+      panic("remap");
+    *pte = paddr | flags | PTE_P;
+    if(a == last)
+      break;
+    a += PGSIZE;
+    paddr += PGSIZE;
+  }
+  return 0;
+}
+
+ssize_t unmap_pages(pgindex_t *pgindex, void *vaddr, size_t size, addr_t *paddr){
+	return -1;
+}
+
+pgindex_t *init_pgindex(void){
+	return NULL;
+}
+
+void destroy_pgindex(pgindex_t *pgindex){
+}
+
+int set_pages_perm(pgindex_t *pgindex, void *vaddr, size_t size, uint32_t flags){
+	return -1;
+}
+
+pgindex_t *get_pgindex(void){
+	uint paddr;
+	asm(
+		"mov %%cr3, %0;"
+		:"=r"(paddr)
+	);
+	return (pgindex_t*)V2P(paddr);
 }
 
 int switch_pgindex(pgindex_t *pgindex){
