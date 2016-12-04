@@ -39,6 +39,7 @@
 #include <aim/sync.h>
 #include <aim/memlayout.h>
 #include <aim/smp.h>
+#include <aim/sched.h>
 
 static inline
 int early_devices_init(void)
@@ -157,6 +158,7 @@ extern void lapicinit();
 extern void picinit();
 extern void ioapicinit();
 extern void timerinit();
+extern void schedule();
 void high_address_entry(){
 	allocator_init();
 	mpinit();
@@ -170,10 +172,11 @@ void high_address_entry(){
 	//test_alloc();
 	//spinlock_init(&testlock);
 	smp_startup();
+	extern int ismp;
 	if(!ismp)
 		timerinit();   // uniprocessor timer
 	//test_lock();
 	//test_switch_regs();
-
+	schedule();
 	panic("Finished All the Code !\n");
 }
