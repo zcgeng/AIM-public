@@ -32,6 +32,7 @@
 static lock_t sched_lock;
 static unsigned long __sched_intrflags;
 
+struct scheduler *scheduler;
 void sched_enter_critical(void)
 {
 	spin_lock_irq_save(&sched_lock, __sched_intrflags);

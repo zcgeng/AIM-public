@@ -87,6 +87,13 @@ walkpgdir(pgindex_t *pgdir, const void *va, int alloc)
 }
 
 void page_index_clear(pgindex_t *index){
+	int i;
+	for(i = 0; i < 1024; ++i){
+		if((index[i] & PTE_P) && !(index[i] & PTE_PS)){
+			pgfree(index[i] & 0x000);
+		}
+		index[i] = 0;
+	}
 }
 
 int map_pages(pgindex_t *pgindex, void *vaddr, addr_t paddr, size_t size, uint32_t flags){
