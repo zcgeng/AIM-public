@@ -61,6 +61,7 @@ void handle_interrupt(int irq)
 		case T_IRQ0 + IRQ_TIMER:
 			kpdebug("CPU%d received a timer interrupt\n", cpuid());
 			lapiceoi();
+			//yield();
 			break;
 		case T_IRQ0 + PANIC_INTERRUPT_NUM :
 			__local_panic(); // IPI panic

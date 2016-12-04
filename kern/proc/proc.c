@@ -179,3 +179,38 @@ void idle_init(void)
 	cpu_idleproc->mm = kernel_mm;
 	cpu_idleproc->kpid = 0;
 }
+
+// Enter scheduler.  Must hold only ptable.lock
+// and have changed proc->state. Saves and restores
+// intena because intena is a property of this
+// kernel thread, not this CPU. It should
+// be proc->intena and proc->ncli, but that would
+// break in the few places where a lock is held but
+// there's no process.
+// void
+// sched(struct proc* proc)
+// {
+//   int intena;
+//
+//   if(!holding(&ptable.lock))
+//     panic("sched ptable.lock");
+//   if(cpu->ncli != 1)
+//     panic("sched locks");
+//   if(proc->state == RUNNING)
+//     panic("sched running");
+//   if(readeflags()&FL_IF)
+//     panic("sched interruptible");
+//   intena = cpu->intena;
+//   swtch(&proc->context, cpu->scheduler);
+//   cpu->intena = intena;
+// }
+//
+// // Give up the CPU for one scheduling round.
+// void
+// yield(struct proc* proc)
+// {
+//   acquire(&ptable.lock);  //DOC: yieldlock
+//   proc->state = RUNNABLE;
+//   sched();
+//   release(&ptable.lock);
+// }
