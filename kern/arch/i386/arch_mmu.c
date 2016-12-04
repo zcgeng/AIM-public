@@ -90,7 +90,7 @@ void page_index_clear(pgindex_t *index){
 	int i;
 	for(i = 0; i < 1024; ++i){
 		if((index[i] & PTE_P) && !(index[i] & PTE_PS)){
-			pgfree(index[i] & 0x000);
+			pgfree(index[i] & 0xfffff000);
 		}
 		index[i] = 0;
 	}
@@ -132,7 +132,22 @@ void destroy_pgindex(pgindex_t *pgindex){
 }
 
 int set_pages_perm(pgindex_t *pgindex, void *vaddr, size_t size, uint32_t flags){
-	return -1;
+	char *a, *last;
+  pte_t *pte;
+
+  a = (char*)PGROUNDDOWN((uint)vaddr);
+  last = (char*)PGROUNDDOWN(((uint)vaddr) + size - 1);
+  for(;;){
+    if((pte = walkpgdir(pgindex, a, 1)) == 0)
+      return -1;
+    *pte &= 0xfffff000;
+		*pte |= flags;
+    if(a == last)
+      break;
+    a += PGSIZE;
+    paddr += PGSIZE;
+  }
+  return 0;
 }
 
 pgindex_t *get_pgindex(void){
