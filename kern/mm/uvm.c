@@ -84,7 +84,7 @@ __unref_and_free_upages(struct upages *p)
 		return __PAGES_FREED;
 	}
 	return 0;
-	
+
 }
 
 void
@@ -405,7 +405,7 @@ mm_clone(struct mm *dst, struct mm *src)
 		}
 
 		memmove(
-			(void *)(size_t)pa2kva(p->paddr), 
+			(void *)(size_t)pa2kva(p->paddr),
 			(void *)(size_t)pa2kva(vma->pages->paddr),
 			vma_new->size
 		);
@@ -441,6 +441,20 @@ finalize:
 	//spin_unlock(&(src->lock));
 	//spin_unlock(&(dst->lock));
 	return retcode;
+}
+
+// Map user virtual address to kernel address.
+void*
+uva2kva(pgindex_t *pgindex, void *uva)
+{
+  pte_t *pte;
+
+  pte = walkpgdir(pgindex, uva, 0);
+  if((*pte & PTE_P) == 0)
+    return 0;
+  if((*pte & PTE_U) == 0)
+    return 0;
+  return (char*)postmap_addr(PTE_ADDR(*pte));
 }
 
 /*
@@ -525,4 +539,3 @@ void mm_init(void)
 	kernel_mm = mm_new();
 	switch_pgindex(kernel_mm->pgindex);
 }
-

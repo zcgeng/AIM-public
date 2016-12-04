@@ -27,6 +27,7 @@
 #include <libc/string.h>
 #include <arch-mmu.h>
 #include <aim/memlayout.h>
+#include <aim/pmm.h>
 
 __attribute__((__aligned__(PGSIZE)))
 pgindex_t entrypgdir[NPDENTRIES];
@@ -57,6 +58,31 @@ int page_index_early_map(pgindex_t *boot_page_index, addr_t paddr, void *vaddr, 
 bool early_mapping_valid(struct early_mapping *entry)
 {
 	return true;
+}
+
+// Return the address of the PTE in page table pgdir
+// that corresponds to virtual address va.  If alloc!=0,
+// create any required page table pages.
+pte_t *
+walkpgdir(pgindex_t *pgdir, const void *va, int alloc)
+{
+  pgindex_t *pde;
+  pgindex_t *pgtab;
+
+  pde = &pgdir[PDX(va)];
+  if(*pde & PTE_P){
+    pgtab = (pte_t*)postmap_addr(PTE_ADDR(*pde));
+  } else {
+    if(!alloc || (pgtab = (pte_t*)(int)pgalloc()) == 0)
+      return 0;
+    // Make sure all those PTE_P bits are zero.
+    memset(pgtab, 0, PGSIZE);
+    // The permissions here are overly generous, but they can
+    // be further restricted by the permissions in the page table
+    // entries, if necessary.
+    *pde = premap_addr(pgtab) | PTE_P | PTE_W | PTE_U;
+  }
+  return &pgtab[PTX(va)];
 }
 
 void page_index_clear(pgindex_t *index)
